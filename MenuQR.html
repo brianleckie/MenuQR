@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MenuQR — La Estancia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --brand-color: /*EDITMODE-BEGIN*/{
+      "brandColor": "#D4622A",
+      "font": "'DM Serif Display'",
+      "accentSoft": "#F5EDE6"
+    }/*EDITMODE-END*/;
+  }
+  body {
+    background: #1A1210;
+    font-family: "DM Sans", sans-serif;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    color: #1C1410;
+  }
+
+  /* Top bar */
+  #topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    background: #120C09;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    flex-shrink: 0;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  #topbar .brand {
+    display: flex; align-items: center; gap: 10px;
+  }
+  #topbar .brand-icon {
+    width: 30px; height: 30px; border-radius: 7px;
+    background: var(--brand-color);
+    display: flex; align-items: center; justify-content: center;
+    font-family: "Lora", serif; font-weight: 700; font-size: 11px; color: #fff;
+  }
+  #topbar .brand-name {
+    font-weight: 800; font-size: 15px; color: #fff; letter-spacing: -0.02em;
+  }
+  #topbar .brand-sub {
+    font-size: 11px; color: rgba(255,255,255,0.4);
+  }
+
+  /* Surface toggle */
+  .surface-toggle {
+    display: flex;
+    background: rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .surface-btn {
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-family: "DM Sans", sans-serif;
+    font-weight: 600;
+    font-size: 12.5px;
+    transition: all 0.18s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .surface-btn.active {
+    background: var(--brand-color);
+    color: #fff;
+  }
+  .surface-btn.inactive {
+    background: transparent;
+    color: rgba(255,255,255,0.5);
+  }
+  .surface-btn.inactive:hover {
+    color: rgba(255,255,255,0.8);
+  }
+
+  /* Stage */
+  #stage {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Mobile frame */
+  .phone-stage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+  }
+  .phone-bezel {
+    width: 390px;
+    height: min(844px, calc(100dvh - 100px));
+    background: #1A1210;
+    border-radius: 50px;
+    padding: 12px;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.12),
+      0 40px 80px rgba(0,0,0,0.7),
+      inset 0 0 0 1px rgba(255,255,255,0.05);
+    position: relative;
+    flex-shrink: 0;
+  }
+  .phone-screen {
+    width: 100%;
+    height: 100%;
+    border-radius: 40px;
+    overflow: hidden;
+    position: relative;
+    background: #FAFAF8;
+  }
+  /* Dynamic island */
+  .phone-island {
+    position: absolute;
+    top: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 34px;
+    background: #1A1210;
+    border-radius: 20px;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 10px;
+  }
+  .phone-camera {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #2A2220;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .phone-screen-inner {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    border-radius: 40px;
+    padding-top: 54px; /* space for dynamic island */
+  }
+
+  /* Admin frame */
+  .admin-stage {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  /* Tweaks panel */
+  #tweaks-panel {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #fff;
+    border-radius: 14px;
+    padding: 16px 18px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    z-index: 9999;
+    width: 220px;
+    font-family: "DM Sans", sans-serif;
+    display: none;
+  }
+  #tweaks-panel h4 {
+    font-size: 13px; font-weight: 700; color: #1C1410;
+    margin-bottom: 14px; letter-spacing: 0.02em;
+  }
+  .tweak-row { margin-bottom: 12px; }
+  .tweak-label { font-size: 11px; font-weight: 600; color: #7A6A5A;
+    text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px; display: block; }
+  .tweak-swatch-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tweak-swatch {
+    width: 28px; height: 28px; border-radius: 8px; cursor: pointer; border: 2px solid transparent;
+    transition: transform 0.1s;
+  }
+  .tweak-swatch:hover { transform: scale(1.15); }
+  .tweak-swatch.selected { border-color: #1C1410; }
+</style>
+</head>
+<body>
+
+<!-- Top Bar -->
+<div id="topbar">
+  <div class="brand">
+    <div class="brand-icon">QR</div>
+    <div>
+      <div class="brand-name">MenuQR</div>
+      <div class="brand-sub">La Estancia · Demo interactiva</div>
+    </div>
+  </div>
+
+  <div class="surface-toggle" id="surfaceToggle">
+    <button class="surface-btn active" id="btnPublic" onclick="setSurface('public')">
+      📱 Menú Público
+    </button>
+    <button class="surface-btn inactive" id="btnAdmin" onclick="setSurface('admin')">
+      ⚙️ Panel Admin
+    </button>
+  </div>
+
+  <div style="font-size:11px; color: rgba(255,255,255,0.3); text-align: right; line-height: 1.4; display: flex; flex-direction: column; align-items: flex-end;">
+    <span>Vista pública → escanear QR</span>
+    <span>Panel admin → gestión de platos</span>
+  </div>
+</div>
+
+<!-- Stage -->
+<div id="stage">
+  <!-- Public: phone frame -->
+  <div class="phone-stage" id="phoneStage">
+    <div class="phone-bezel">
+      <div class="phone-island">
+        <div class="phone-camera"></div>
+      </div>
+      <div class="phone-screen">
+        <div class="phone-screen-inner" id="publicRoot"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin: full width -->
+  <div class="admin-stage" id="adminStage" style="display:none;">
+    <div id="adminRoot" style="height:100%;"></div>
+  </div>
+</div>
+
+<!-- Tweaks panel -->
+<div id="tweaks-panel">
+  <h4>Tweaks</h4>
+  <div class="tweak-row">
+    <span class="tweak-label">Color de marca</span>
+    <div class="tweak-swatch-row" id="colorSwatches"></div>
+  </div>
+  <div class="tweak-row">
+    <span class="tweak-label">Tipografía</span>
+    <div id="fontSwatches" style="display:flex; flex-direction:column; gap:5px;"></div>
+  </div>
+</div>
+
+<script type="text/babel" src="data.jsx"></script>
+<script type="text/babel" src="PublicMenu.jsx"></script>
+<script type="text/babel" src="AdminPanel.jsx"></script>
+
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+// ── Tweaks defaults ──────────────────────────────────────────────────────────
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{"brandColor":"#D4622A","font":"Lora"}/*EDITMODE-END*/;
+
+const COLORS = [
+  { label: "Terracota", value: "#D4622A" },
+  { label: "Bordó",     value: "#922B21" },
+  { label: "Bosque",    value: "#2D6A4F" },
+  { label: "Índigo",    value: "#3D5A9A" },
+  { label: "Ciruela",   value: "#7B3F6E" },
+  { label: "Mostaza",   value: "#B5860D" },
+];
+const FONTS = [
+  { label: "Lora", value: "Lora" },
+  { label: "DM Serif", value: "'DM Serif Display'" },
+  { label: "Playfair", value: "'Playfair Display'" },
+];
+
+// Extra Google Fonts
+const extraLink = document.createElement("link");
+extraLink.rel = "stylesheet";
+extraLink.href = "https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Playfair+Display:wght@700&display=swap";
+document.head.appendChild(extraLink);
+
+function applyTweaks(tweaks) {
+  document.documentElement.style.setProperty("--brand-color", tweaks.brandColor);
+  // font applied via JS to Lora headings — the CSS var trick
+  document.documentElement.style.setProperty("--heading-font", tweaks.font + ", serif");
+}
+
+// ── Surface toggle ────────────────────────────────────────────────────────────
+let currentSurface = "public";
+window.setSurface = function(surface) {
+  currentSurface = surface;
+  document.getElementById("phoneStage").style.display = surface === "public" ? "flex" : "none";
+  document.getElementById("adminStage").style.display = surface === "admin" ? "block" : "none";
+  document.getElementById("btnPublic").className = "surface-btn " + (surface === "public" ? "active" : "inactive");
+  document.getElementById("btnAdmin").className = "surface-btn " + (surface === "admin" ? "active" : "inactive");
+};
+
+// ── App root ──────────────────────────────────────────────────────────────────
+function App() {
+  const [tweaks, setTweaks] = useState(TWEAK_DEFAULTS);
+
+  useEffect(() => { applyTweaks(tweaks); }, [tweaks]);
+
+  // Tweaks panel logic
+  useEffect(() => {
+    const panel = document.getElementById("tweaks-panel");
+
+    // Build color swatches
+    const colorRow = document.getElementById("colorSwatches");
+    colorRow.innerHTML = "";
+    COLORS.forEach(c => {
+      const btn = document.createElement("button");
+      btn.className = "tweak-swatch" + (tweaks.brandColor === c.value ? " selected" : "");
+      btn.style.background = c.value;
+      btn.title = c.label;
+      btn.onclick = () => {
+        setTweaks(t => ({ ...t, brandColor: c.value }));
+        window.parent.postMessage({ type: "__edit_mode_set_keys", edits: { brandColor: c.value } }, "*");
+      };
+      colorRow.appendChild(btn);
+    });
+
+    // Build font buttons
+    const fontRow = document.getElementById("fontSwatches");
+    fontRow.innerHTML = "";
+    FONTS.forEach(f => {
+      const btn = document.createElement("button");
+      btn.style.cssText = `padding:6px 10px; border-radius:7px; border: 1.5px solid ${tweaks.font === f.value ? "var(--brand-color)" : "#E4DED6"}; background: ${tweaks.font === f.value ? "#FEF3EC" : "#fff"}; cursor:pointer; font-family:${f.value},serif; font-size:13px; color:#1C1410; text-align:left;`;
+      btn.textContent = f.label + " — La Estancia";
+      btn.onclick = () => {
+        setTweaks(t => ({ ...t, font: f.value }));
+        document.documentElement.style.setProperty("--heading-font", f.value + ", serif");
+        window.parent.postMessage({ type: "__edit_mode_set_keys", edits: { font: f.value } }, "*");
+      };
+      fontRow.appendChild(btn);
+    });
+
+    // Message listener
+    const handler = (e) => {
+      if (e.data?.type === "__activate_edit_mode") panel.style.display = "block";
+      if (e.data?.type === "__deactivate_edit_mode") panel.style.display = "none";
+    };
+    window.addEventListener("message", handler);
+    window.parent.postMessage({ type: "__edit_mode_available" }, "*");
+    return () => window.removeEventListener("message", handler);
+  }, [tweaks]);
+
+  const goToAdmin = () => window.setSurface("admin");
+
+  return (
+    <>
+      <div id="publicMount" style={{ height: "100%", display: "contents" }}>
+        <PublicMenu />
+      </div>
+      <div id="adminMount" style={{ height: "100%", display: "contents" }}>
+        <AdminPanel onViewPublic={() => window.setSurface("public")} />
+      </div>
+    </>
+  );
+}
+
+// Mount public and admin separately so they live in their own containers
+ReactDOM.createRoot(document.getElementById("publicRoot")).render(<PublicMenu />);
+ReactDOM.createRoot(document.getElementById("adminRoot")).render(
+  <AdminPanel onViewPublic={() => window.setSurface("public")} />
+);
+
+// Apply initial tweaks
+applyTweaks(TWEAK_DEFAULTS);
+
+// Tweaks panel — mount a small watcher
+const tweaksPanel = document.getElementById("tweaks-panel");
+const handler = (e) => {
+  if (e.data?.type === "__activate_edit_mode") tweaksPanel.style.display = "block";
+  if (e.data?.type === "__deactivate_edit_mode") tweaksPanel.style.display = "none";
+};
+window.addEventListener("message", handler);
+window.parent.postMessage({ type: "__edit_mode_available" }, "*");
+
+// Build swatches on load
+function buildTweaksUI(currentTweaks) {
+  const colorRow = document.getElementById("colorSwatches");
+  colorRow.innerHTML = "";
+  COLORS.forEach(c => {
+    const btn = document.createElement("button");
+    btn.className = "tweak-swatch" + (currentTweaks.brandColor === c.value ? " selected" : "");
+    btn.style.background = c.value;
+    btn.title = c.label;
+    btn.onclick = () => {
+      document.documentElement.style.setProperty("--brand-color", c.value);
+      colorRow.querySelectorAll(".tweak-swatch").forEach(b => b.classList.remove("selected"));
+      btn.classList.add("selected");
+      window.parent.postMessage({ type: "__edit_mode_set_keys", edits: { brandColor: c.value } }, "*");
+    };
+    colorRow.appendChild(btn);
+  });
+
+  const fontRow = document.getElementById("fontSwatches");
+  fontRow.innerHTML = "";
+  FONTS.forEach(f => {
+    const btn = document.createElement("button");
+    btn.style.cssText = `padding:6px 10px; border-radius:7px; border: 1.5px solid ${currentTweaks.font === f.value ? "#D4622A" : "#E4DED6"}; background: ${currentTweaks.font === f.value ? "#FEF3EC" : "#fff"}; cursor:pointer; font-family:${f.value},serif; font-size:13px; color:#1C1410; text-align:left; transition: all 0.15s;`;
+    btn.textContent = f.label + " — La Estancia";
+    btn.onclick = () => {
+      document.documentElement.style.setProperty("--heading-font", f.value + ", serif");
+      fontRow.querySelectorAll("button").forEach(b => { b.style.borderColor = "#E4DED6"; b.style.background = "#fff"; });
+      btn.style.borderColor = document.documentElement.style.getPropertyValue("--brand-color") || "#D4622A";
+      btn.style.background = "#FEF3EC";
+      window.parent.postMessage({ type: "__edit_mode_set_keys", edits: { font: f.value } }, "*");
+    };
+    fontRow.appendChild(btn);
+  });
+}
+
+buildTweaksUI(TWEAK_DEFAULTS);
+applyTweaks(TWEAK_DEFAULTS);
+</script>
+</body>
+</html>
