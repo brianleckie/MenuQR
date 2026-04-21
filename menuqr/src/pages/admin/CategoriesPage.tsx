@@ -2,7 +2,7 @@ import { MOCK_CATEGORIES, MOCK_ITEMS } from '../../lib/mock-data'
 
 export function CategoriesPage() {
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <div className="mb-6">
         <h1 className="font-serif text-2xl font-bold text-stone-800">Categorías</h1>
         <p className="mt-1 text-sm text-stone-500">

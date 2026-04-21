@@ -45,7 +45,7 @@ export function MenuItemsPage() {
     alert(`${action} — disponible en la versión completa.`)
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <div className="mb-5 flex items-center justify-between">
         <h1 className="font-serif text-2xl font-bold text-stone-800">Platos</h1>
         <button
@@ -75,8 +75,77 @@ export function MenuItemsPage() {
         ))}
       </div>
 
-      {/* Table */}
-      <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-stone-100">
+      {/* Mobile cards */}
+      <div className="md:hidden">
+        {filtered.length === 0 ? (
+          <div className="py-10 text-center text-sm text-stone-400">
+            No hay platos en esta categoría aún.
+          </div>
+        ) : (
+          <div className="grid gap-3">
+            {filtered.map((dish) => (
+              <div
+                key={dish.id}
+                className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-stone-100"
+              >
+                <div className="flex gap-3">
+                  <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl bg-stone-100">
+                    {dish.image_url && (
+                      <img
+                        src={dish.image_url}
+                        alt={dish.name}
+                        className="h-full w-full object-cover"
+                        style={{ filter: dish.available ? 'none' : 'grayscale(70%)' }}
+                      />
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-serif text-sm font-semibold text-stone-800">
+                      {dish.name}
+                    </p>
+                    {dish.short_desc && (
+                      <p className="line-clamp-1 text-xs text-stone-400">{dish.short_desc}</p>
+                    )}
+                    <p className="mt-0.5 text-sm font-bold" style={{ color: 'var(--brand-color)' }}>
+                      {formatPrice(dish.price)}
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center justify-between border-t border-stone-100 pt-3">
+                  <div className="flex items-center gap-2">
+                    <Toggle checked={dish.available} onChange={() => toggleAvail(dish.id)} />
+                    <span
+                      className="text-xs font-semibold"
+                      style={{ color: dish.available ? '#4A8A4A' : '#9E9E9E' }}
+                    >
+                      {dish.available ? 'Disponible' : 'Agotado'}
+                    </span>
+                  </div>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => noop('Editar plato')}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-stone-100 text-stone-600"
+                      title="Editar"
+                    >
+                      ✏️
+                    </button>
+                    <button
+                      onClick={() => noop('Eliminar plato')}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-50 text-red-500"
+                      title="Eliminar"
+                    >
+                      🗑
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Desktop table */}
+      <div className="hidden overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-stone-100 md:block">
         {filtered.length === 0 ? (
           <div className="py-10 text-center text-sm text-stone-400">
             No hay platos en esta categoría aún.
@@ -107,9 +176,7 @@ export function MenuItemsPage() {
                   {/* Name + thumbnail */}
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div
-                        className="h-[34px] w-[46px] flex-shrink-0 overflow-hidden rounded-lg bg-stone-100"
-                      >
+                      <div className="h-[34px] w-[46px] flex-shrink-0 overflow-hidden rounded-lg bg-stone-100">
                         {dish.image_url && (
                           <img
                             src={dish.image_url}

@@ -1,7 +1,9 @@
 import { useRef } from 'react'
 import { QRCodeSVG, QRCodeCanvas } from 'qrcode.react'
+import { menuUrl } from '../../lib/config'
+import { MOCK_BUSINESS } from '../../lib/mock-data'
 
-const QR_URL = 'https://menuqr.vercel.app/menu/la-estancia'
+const QR_URL = menuUrl(MOCK_BUSINESS.slug)
 
 export function QRPage() {
   const canvasContainerRef = useRef<HTMLDivElement>(null)
@@ -11,16 +13,16 @@ export function QRPage() {
     if (!canvas) return
     const link = document.createElement('a')
     link.href = canvas.toDataURL('image/png')
-    link.download = 'qr-la-estancia.png'
+    link.download = `qr-${MOCK_BUSINESS.slug}.png`
     link.click()
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <h1 className="mb-6 font-serif text-2xl font-bold text-stone-800">Tu QR y enlace</h1>
 
-      <div className="rounded-2xl bg-white p-8 shadow-sm ring-1 ring-stone-100">
-        <div className="flex flex-wrap items-start gap-10">
+      <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-stone-100 md:p-8">
+        <div className="flex flex-wrap items-start gap-8 md:gap-10">
           {/* QR display */}
           <div className="rounded-2xl border-2 border-stone-100 p-4">
             <QRCodeSVG
@@ -32,7 +34,7 @@ export function QRPage() {
           </div>
 
           {/* Info + actions */}
-          <div className="flex-1" style={{ minWidth: 200 }}>
+          <div className="flex-1 min-w-0">
             <h2 className="mb-2 font-serif text-xl font-bold text-stone-800">
               Descargá tu QR
             </h2>
@@ -44,10 +46,10 @@ export function QRPage() {
             <div className="mb-5 rounded-xl bg-stone-50 px-4 py-3">
               <p className="mb-1 text-xs text-stone-400">Enlace directo</p>
               <p
-                className="font-mono text-sm break-all"
+                className="break-all font-mono text-sm"
                 style={{ color: 'var(--brand-color)' }}
               >
-                menuqr.vercel.app/menu/la-estancia
+                {QR_URL}
               </p>
             </div>
 

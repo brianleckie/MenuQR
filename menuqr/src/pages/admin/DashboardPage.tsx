@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { MOCK_ITEMS, MOCK_CATEGORIES, MOCK_BUSINESS } from '../../lib/mock-data'
+import { menuUrl } from '../../lib/config'
 
 function StatCard({
   label,
@@ -75,10 +76,10 @@ export function DashboardPage() {
   const available = MOCK_ITEMS.filter((d) => d.available).length
   const cats = MOCK_CATEGORIES.length
   const soldOut = MOCK_ITEMS.filter((d) => !d.available)
-  const menuUrl = `menuqr.vercel.app/menu/${MOCK_BUSINESS.slug}`
+  const qrUrl = menuUrl(MOCK_BUSINESS.slug)
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <div className="mb-6">
         <h1 className="mb-1 font-serif text-2xl font-bold text-stone-800">
           Bienvenido, {MOCK_BUSINESS.name} 👋
@@ -89,7 +90,7 @@ export function DashboardPage() {
       </div>
 
       {/* Stats */}
-      <div className="mb-6 grid grid-cols-3 gap-3">
+      <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-3">
         <StatCard label="Platos" value={total} sub={`${available} disponibles`} />
         <StatCard label="Categorías" value={cats} sub="activas" />
         <StatCard label="Estado" value="✓ Online" sub="QR activo" />
@@ -102,13 +103,13 @@ export function DashboardPage() {
           <div className="rounded-xl border-2 border-stone-100 p-3">
             <FakeQR size={130} />
           </div>
-          <div className="flex-1" style={{ minWidth: 200 }}>
+          <div className="min-w-0 flex-1">
             <p className="mb-2 text-sm leading-relaxed text-stone-600">
               Compartí este QR en tus mesas, mostrador o redes. Tus clientes lo escanean
               y ven tu menú al instante, sin descargar nada.
             </p>
-            <p className="mb-4 rounded-lg bg-stone-50 px-3 py-2 font-mono text-xs text-stone-500 break-all">
-              {menuUrl}
+            <p className="mb-4 break-all rounded-lg bg-stone-50 px-3 py-2 font-mono text-xs text-stone-500">
+              {qrUrl}
             </p>
             <div className="flex flex-wrap gap-2">
               <button
