@@ -21,7 +21,7 @@ export function AdminLayout() {
   return (
     <div className="flex h-screen bg-stone-100 font-sans">
       {/* ── Sidebar ────────────────────────────────────────────────── */}
-      <aside className="flex w-56 flex-col bg-stone-900 text-white">
+      <aside className="hidden w-56 flex-col bg-stone-900 text-white md:flex">
         {/* Brand */}
         <div className="border-b border-white/10 px-5 py-5">
           <div className="flex items-center gap-3">
@@ -72,9 +72,31 @@ export function AdminLayout() {
       </aside>
 
       {/* ── Main ───────────────────────────────────────────────────── */}
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-auto pb-16 md:pb-0">
         <Outlet />
       </main>
+
+      {/* ── Bottom nav (mobile only) ────────────────────────────────── */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 flex border-t border-white/10 bg-stone-900 md:hidden">
+        {navItems.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={item.end}
+            className={({ isActive }) =>
+              `flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-semibold transition ${
+                isActive ? 'text-white' : 'text-white/40'
+              }`
+            }
+            style={({ isActive }) =>
+              isActive ? { color: 'var(--brand-color)' } : undefined
+            }
+          >
+            <span className="text-xl leading-none">{item.icon}</span>
+            {item.label}
+          </NavLink>
+        ))}
+      </nav>
     </div>
   )
 }

@@ -43,7 +43,7 @@ export function SettingsPage() {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <h1 className="mb-6 font-serif text-2xl font-bold text-stone-800">Ajustes</h1>
 
       <div className="grid gap-5 lg:grid-cols-2">
