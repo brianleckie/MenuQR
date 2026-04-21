@@ -5,6 +5,10 @@ import { ProtectedRoute } from './routes/ProtectedRoute'
 import { LoginPage } from './pages/admin/LoginPage'
 import { AdminLayout } from './pages/admin/AdminLayout'
 import { DashboardPage } from './pages/admin/DashboardPage'
+import { MenuItemsPage } from './pages/admin/MenuPage'
+import { CategoriesPage } from './pages/admin/CategoriesPage'
+import { QRPage } from './pages/admin/QRPage'
+import { SettingsPage } from './pages/admin/SettingsPage'
 import { MenuPage } from './pages/menu/MenuPage'
 
 const queryClient = new QueryClient({
@@ -25,13 +29,20 @@ export default function App() {
             <Route element={<ProtectedRoute />}>
               <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<DashboardPage />} />
-                <Route path="menu" element={<div className="p-8 text-stone-400">Gestión de platos — Sprint 2</div>} />
-                <Route path="categories" element={<div className="p-8 text-stone-400">Categorías — Sprint 2</div>} />
-                <Route path="qr" element={<div className="p-8 text-stone-400">QR & Link — Sprint 2</div>} />
-                <Route path="settings" element={<div className="p-8 text-stone-400">Ajustes — Sprint 2</div>} />
+                <Route path="menu" element={<MenuItemsPage />} />
+                <Route path="categories" element={<CategoriesPage />} />
+                <Route path="qr" element={<QRPage />} />
+                <Route path="settings" element={<SettingsPage />} />
               </Route>
             </Route>
-            <Route path="*" element={<div className="flex min-h-screen items-center justify-center text-stone-400">404</div>} />
+            <Route
+              path="*"
+              element={
+                <div className="flex min-h-screen items-center justify-center text-stone-400">
+                  404
+                </div>
+              }
+            />
           </Routes>
         </BrowserRouter>
       </AuthProvider>
