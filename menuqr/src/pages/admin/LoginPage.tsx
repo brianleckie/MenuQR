@@ -1,9 +1,8 @@
 import { useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { isDemoMode, loginDemo } from '../../lib/mock-auth'
 import { supabase } from '../../lib/supabase'
 
 export function LoginPage() {
-  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -14,7 +13,19 @@ export function LoginPage() {
     setError(null)
     setLoading(true)
 
-    const { error: authError } = await supabase.auth.signInWithPassword({
+    if (isDemoMode()) {
+      const result = await loginDemo(email, password)
+      if ('error' in result) {
+        setError(result.error)
+        setLoading(false)
+        return
+      }
+      // Force full remount so AuthProvider re-reads sessionStorage
+      window.location.replace('/admin')
+      return
+    }
+
+    const { error: authError } = await supabase!.auth.signInWithPassword({
       email,
       password,
     })
@@ -25,7 +36,7 @@ export function LoginPage() {
       return
     }
 
-    navigate('/admin')
+    window.location.replace('/admin')
   }
 
   return (
@@ -48,6 +59,12 @@ export function LoginPage() {
           <h2 className="mb-6 text-lg font-semibold text-stone-800">
             Iniciá sesión
           </h2>
+
+          {isDemoMode() && (
+            <div className="mb-4 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-700 ring-1 ring-amber-200">
+              <span className="font-semibold">Demo:</span> demo@menuqr.com / demo1234
+            </div>
+          )}
 
           {error && (
             <div className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">

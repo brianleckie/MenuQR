@@ -14,3 +14,12 @@ body {
   margin: 0;
   -webkit-font-smoothing: antialiased;
 }
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+}
