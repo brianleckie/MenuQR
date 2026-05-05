@@ -59,6 +59,25 @@ export function useUpdateBusiness() {
   })
 }
 
+export function useCreateBusiness() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (payload: Omit<Business, 'id' | 'created_at' | 'updated_at'>) => {
+      if (!supabase) throw new Error('Supabase not configured')
+      const { data, error } = await supabase
+        .from('businesses')
+        .insert(payload)
+        .select()
+        .single()
+      if (error) throw error
+      return data as Business
+    },
+    onSuccess: (data: Business) => {
+      qc.invalidateQueries({ queryKey: qk.myBusiness(data.owner_id) })
+    },
+  })
+}
+
 // ── Categories ────────────────────────────────────────────────────────────────
 
 export function useCategories(businessId: string | undefined) {
@@ -109,6 +128,34 @@ export function useDeleteCategory() {
     onSuccess: ({ businessId }: { businessId: string }) => {
       qc.invalidateQueries({ queryKey: qk.categories(businessId) })
       qc.invalidateQueries({ queryKey: qk.items(businessId) })
+    },
+  })
+}
+
+export function useUpdateCategory() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async ({
+      id,
+      name,
+      businessId: _businessId,
+    }: {
+      id: string
+      name: string
+      businessId: string
+    }) => {
+      if (!supabase) throw new Error('Supabase not configured')
+      const { data, error } = await supabase
+        .from('categories')
+        .update({ name })
+        .eq('id', id)
+        .select()
+        .single()
+      if (error) throw error
+      return data as Category
+    },
+    onSuccess: (_data, { businessId }) => {
+      qc.invalidateQueries({ queryKey: qk.categories(businessId) })
     },
   })
 }
@@ -186,6 +233,17 @@ export function useToggleItemAvailability() {
         .eq('id', id)
       if (error) throw error
       return { businessId }
+    },
+    onMutate: async ({ id, available, businessId }) => {
+      await qc.cancelQueries({ queryKey: qk.items(businessId) })
+      const prev = qc.getQueryData(qk.items(businessId))
+      qc.setQueryData(qk.items(businessId), (old: Item[] | undefined) =>
+        old?.map(item => item.id === id ? { ...item, available } : item)
+      )
+      return { prev }
+    },
+    onError: (_err, { businessId }, ctx) => {
+      qc.setQueryData(qk.items(businessId), ctx?.prev)
     },
     onSuccess: ({ businessId }: { businessId: string }) => {
       qc.invalidateQueries({ queryKey: qk.items(businessId) })

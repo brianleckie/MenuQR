@@ -1,7 +1,6 @@
 import { useParams } from 'react-router-dom'
 import { useEffect, useState, useRef } from 'react'
 import { useMenuData } from '../../lib/queries'
-import { isDemoMode } from '../../lib/mock-auth'
 import { MOCK_MENU_DATA, formatPrice } from '../../lib/mock-data'
 import type { Item, MenuData } from '../../types'
 
@@ -215,7 +214,7 @@ function DishModal({ dish, whatsapp, onClose }: DishModalProps) {
 export function MenuPage() {
   const { slug } = useParams<{ slug: string }>()
 
-  const isDemo = isDemoMode() || slug === 'la-estancia'
+  const isDemo = !import.meta.env.VITE_SUPABASE_URL
   const queryResult = useMenuData(isDemo ? '' : (slug ?? ''))
 
   const data: MenuData | undefined = isDemo ? MOCK_MENU_DATA : queryResult.data
@@ -260,9 +259,18 @@ export function MenuPage() {
   if (error || !data) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-stone-50 px-4 text-center">
-        <p className="text-4xl">🍽️</p>
-        <h1 className="mt-3 text-lg font-bold text-stone-700">Menú no encontrado</h1>
-        <p className="mt-1 text-sm text-stone-400">Verificá que el enlace sea correcto.</p>
+        <p className="text-5xl">🍽️</p>
+        <h1 className="mt-4 font-serif text-xl font-bold text-stone-700">Menú no encontrado</h1>
+        <p className="mt-2 text-sm text-stone-400">
+          Este restaurante no existe o fue removido.
+        </p>
+        <a
+          href="/"
+          className="mt-6 rounded-xl px-5 py-2.5 text-sm font-bold text-white"
+          style={{ background: '#D4622A' }}
+        >
+          Volver al inicio
+        </a>
       </div>
     )
   }

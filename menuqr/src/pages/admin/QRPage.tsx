@@ -1,19 +1,52 @@
 import { useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { QRCodeSVG, QRCodeCanvas } from 'qrcode.react'
 import { menuUrl } from '../../lib/config'
-import { MOCK_BUSINESS } from '../../lib/mock-data'
-
-const QR_URL = menuUrl(MOCK_BUSINESS.slug)
+import { useAuth } from '../../contexts/AuthContext'
+import { useMyBusiness } from '../../lib/queries'
 
 export function QRPage() {
+  const navigate = useNavigate()
+  const { user } = useAuth()
+  const { data: business, isLoading } = useMyBusiness(user?.id)
   const canvasContainerRef = useRef<HTMLDivElement>(null)
+
+  if (isLoading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-stone-300 border-t-stone-600" />
+      </div>
+    )
+  }
+
+  if (!business) {
+    return (
+      <div className="p-4 md:p-8">
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6">
+          <p className="mb-1 font-serif text-lg font-bold text-amber-900">Sin negocio configurado</p>
+          <p className="mb-4 text-sm text-amber-700">
+            Configurá tu negocio en Ajustes para generar el QR.
+          </p>
+          <button
+            onClick={() => navigate('/admin/settings')}
+            className="rounded-xl px-5 py-2.5 text-sm font-bold text-white transition hover:opacity-90"
+            style={{ background: 'var(--brand-color)' }}
+          >
+            Ir a Ajustes →
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  const qrUrl = menuUrl(business.slug)
 
   const handleDownload = () => {
     const canvas = canvasContainerRef.current?.querySelector('canvas')
     if (!canvas) return
     const link = document.createElement('a')
     link.href = canvas.toDataURL('image/png')
-    link.download = `qr-${MOCK_BUSINESS.slug}.png`
+    link.download = `qr-${business.slug}.png`
     link.click()
   }
 
@@ -26,7 +59,7 @@ export function QRPage() {
           {/* QR display */}
           <div className="rounded-2xl border-2 border-stone-100 p-4">
             <QRCodeSVG
-              value={QR_URL}
+              value={qrUrl}
               size={180}
               fgColor="#1C1410"
               bgColor="#ffffff"
@@ -49,7 +82,7 @@ export function QRPage() {
                 className="break-all font-mono text-sm"
                 style={{ color: 'var(--brand-color)' }}
               >
-                {QR_URL}
+                {qrUrl}
               </p>
             </div>
 
@@ -66,7 +99,7 @@ export function QRPage() {
 
       {/* Hidden canvas used only for PNG export */}
       <div ref={canvasContainerRef} className="sr-only" aria-hidden="true">
-        <QRCodeCanvas value={QR_URL} size={512} fgColor="#1C1410" bgColor="#ffffff" />
+        <QRCodeCanvas value={qrUrl} size={512} fgColor="#1C1410" bgColor="#ffffff" />
       </div>
     </div>
   )

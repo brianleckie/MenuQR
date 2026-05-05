@@ -1,8 +1,16 @@
-import { useState, type ChangeEvent } from 'react'
-import { MOCK_BUSINESS } from '../../lib/mock-data'
+import { useEffect, useState, type ChangeEvent } from 'react'
+import { useAuth } from '../../contexts/AuthContext'
+import { useMyBusiness, useCreateBusiness, useUpdateBusiness } from '../../lib/queries'
+import { APP_URL } from '../../lib/config'
+
+const inputClass =
+  'w-full rounded-xl border border-stone-200 bg-stone-50 px-4 py-2.5 text-sm text-stone-800 outline-none transition focus:border-[var(--brand-color)] focus:ring-2 focus:ring-[var(--brand-color)]/20'
+const labelClass =
+  'mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500'
 
 interface SettingsForm {
   name: string
+  slug: string
   tagline: string
   primary_color: string
   whatsapp: string
@@ -10,41 +18,143 @@ interface SettingsForm {
   hours: string
 }
 
-const inputClass =
-  'w-full rounded-xl border border-stone-200 bg-stone-50 px-4 py-2.5 text-sm text-stone-800 outline-none transition focus:border-[var(--brand-color)] focus:ring-2 focus:ring-[var(--brand-color)]/20'
-const labelClass =
-  'mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500'
+function slugify(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+}
+
+function isValidSlug(s: string): boolean {
+  return /^[a-z0-9][a-z0-9-]*[a-z0-9]$/.test(s) || /^[a-z0-9]$/.test(s)
+}
 
 export function SettingsPage() {
-  const [form, setForm] = useState<SettingsForm>({
-    name: MOCK_BUSINESS.name,
-    tagline: MOCK_BUSINESS.tagline ?? '',
-    primary_color: MOCK_BUSINESS.primary_color,
-    whatsapp: MOCK_BUSINESS.whatsapp ?? '',
-    address: MOCK_BUSINESS.address ?? '',
-    hours: MOCK_BUSINESS.hours ?? '',
-  })
-  const [saved, setSaved] = useState(false)
+  const { user } = useAuth()
+  const { data: business, isLoading } = useMyBusiness(user?.id)
+  const createBusiness = useCreateBusiness()
+  const updateBusiness = useUpdateBusiness()
 
-  const set = (k: keyof SettingsForm) => (e: ChangeEvent<HTMLInputElement>) => {
-    setForm((f) => ({ ...f, [k]: e.target.value }))
-    setSaved(false)
+  const [form, setForm] = useState<SettingsForm>({
+    name: '',
+    slug: '',
+    tagline: '',
+    primary_color: '#D4622A',
+    whatsapp: '',
+    address: '',
+    hours: '',
+  })
+  const [slugManuallyEdited, setSlugManuallyEdited] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [slugError, setSlugError] = useState('')
+
+  useEffect(() => {
+    if (business) {
+      setForm({
+        name: business.name,
+        slug: business.slug,
+        tagline: business.tagline ?? '',
+        primary_color: business.primary_color,
+        whatsapp: business.whatsapp ?? '',
+        address: business.address ?? '',
+        hours: business.hours ?? '',
+      })
+      setSlugManuallyEdited(true)
+      document.documentElement.style.setProperty('--brand-color', business.primary_color)
+    }
+  }, [business])
+
+  function set(k: keyof SettingsForm) {
+    return (e: ChangeEvent<HTMLInputElement>) => {
+      const v = e.target.value
+      setSaved(false)
+      if (k === 'name' && !slugManuallyEdited) {
+        setForm(f => ({ ...f, name: v, slug: slugify(v) }))
+      } else {
+        setForm(f => ({ ...f, [k]: v }))
+      }
+    }
   }
 
-  const handleColorChange = (e: ChangeEvent<HTMLInputElement>) => {
+  function handleColorChange(e: ChangeEvent<HTMLInputElement>) {
     const color = e.target.value
-    setForm((f) => ({ ...f, primary_color: color }))
+    setForm(f => ({ ...f, primary_color: color }))
     document.documentElement.style.setProperty('--brand-color', color)
     setSaved(false)
   }
 
-  const handleSave = () => {
-    setSaved(true)
+  function handleSlugChange(e: ChangeEvent<HTMLInputElement>) {
+    const v = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '')
+    setForm(f => ({ ...f, slug: v }))
+    setSlugManuallyEdited(true)
+    setSaved(false)
+    setSlugError('')
+  }
+
+  async function handleSave() {
+    if (!form.name.trim()) return
+    if (!isValidSlug(form.slug)) {
+      setSlugError('El slug solo puede contener minúsculas, números y guiones.')
+      return
+    }
+    setSlugError('')
+
+    const payload = {
+      name: form.name.trim(),
+      slug: form.slug,
+      tagline: form.tagline.trim() || null,
+      primary_color: form.primary_color,
+      whatsapp: form.whatsapp.trim() || null,
+      address: form.address.trim() || null,
+      hours: form.hours.trim() || null,
+      logo_url: business?.logo_url ?? null,
+      cover_url: business?.cover_url ?? null,
+    }
+
+    if (business) {
+      updateBusiness.mutate(
+        { id: business.id, updates: payload },
+        {
+          onSuccess: () => {
+            setSaved(true)
+            setTimeout(() => setSaved(false), 2000)
+          },
+        }
+      )
+    } else {
+      createBusiness.mutate(
+        { owner_id: user!.id, ...payload },
+        {
+          onSuccess: () => {
+            setSaved(true)
+            setTimeout(() => setSaved(false), 2000)
+          },
+        }
+      )
+    }
+  }
+
+  const isPending = createBusiness.isPending || updateBusiness.isPending
+  const mutError = createBusiness.error?.message ?? updateBusiness.error?.message ?? null
+
+  if (isLoading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-stone-300 border-t-stone-600" />
+      </div>
+    )
   }
 
   return (
     <div className="p-4 md:p-8">
-      <h1 className="mb-6 font-serif text-2xl font-bold text-stone-800">Ajustes</h1>
+      <h1 className="mb-2 font-serif text-2xl font-bold text-stone-800">Ajustes</h1>
+      {!business && (
+        <p className="mb-6 text-sm text-stone-500">
+          Completá los datos de tu negocio para activar tu menú digital.
+        </p>
+      )}
 
       <div className="grid gap-5 lg:grid-cols-2">
         {/* Business info */}
@@ -53,13 +163,34 @@ export function SettingsPage() {
 
           <div className="space-y-4">
             <div>
-              <label className={labelClass}>Nombre del restaurante</label>
+              <label className={labelClass}>Nombre del restaurante *</label>
               <input
                 type="text"
+                required
                 value={form.name}
                 onChange={set('name')}
                 className={inputClass}
+                placeholder="La Estancia"
               />
+            </div>
+
+            <div>
+              <label className={labelClass}>Slug (URL)</label>
+              <input
+                type="text"
+                value={form.slug}
+                onChange={handleSlugChange}
+                className={inputClass}
+                placeholder="la-estancia"
+              />
+              {slugError && (
+                <p className="mt-1 text-xs text-red-500">{slugError}</p>
+              )}
+              {form.slug && !slugError && (
+                <p className="mt-1 font-mono text-xs text-stone-400">
+                  {APP_URL}/menu/{form.slug}
+                </p>
+              )}
             </div>
 
             <div>
@@ -68,7 +199,7 @@ export function SettingsPage() {
                 type="text"
                 value={form.tagline}
                 onChange={set('tagline')}
-                placeholder="Ej: Cocina paraguaya con alma"
+                placeholder="Cocina paraguaya con alma"
                 className={inputClass}
               />
             </div>
@@ -143,7 +274,9 @@ export function SettingsPage() {
             >
               QR
             </div>
-            <p className="font-serif text-base font-bold text-stone-800">{form.name}</p>
+            <p className="font-serif text-base font-bold text-stone-800">
+              {form.name || 'Tu negocio'}
+            </p>
             {form.tagline && (
               <p className="text-xs italic text-stone-400">{form.tagline}</p>
             )}
@@ -161,15 +294,14 @@ export function SettingsPage() {
       <div className="mt-5 flex items-center gap-4">
         <button
           onClick={handleSave}
-          className="rounded-xl px-6 py-2.5 text-sm font-bold text-white transition hover:opacity-90"
+          disabled={isPending}
+          className="rounded-xl px-6 py-2.5 text-sm font-bold text-white transition hover:opacity-90 disabled:opacity-60"
           style={{ background: saved ? '#4A8A4A' : 'var(--brand-color)' }}
         >
-          {saved ? '✓ Guardado' : 'Guardar cambios'}
+          {isPending ? 'Guardando...' : saved ? '✓ Guardado' : business ? 'Guardar cambios' : 'Crear negocio'}
         </button>
-        {saved && (
-          <p className="text-sm text-stone-400">
-            Cambios guardados en la demo.
-          </p>
+        {mutError && (
+          <p className="text-sm text-red-500">{mutError}</p>
         )}
       </div>
     </div>
