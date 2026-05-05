@@ -281,13 +281,15 @@ export function MenuPage() {
     <div className="min-h-screen bg-stone-50 font-sans">
       {/* Cover */}
       <div className="relative" style={{ height: 180, background: '#2A1810', overflow: 'hidden' }}>
-        {business.cover_url && (
+        {business.cover_url ? (
           <img
             src={business.cover_url}
             alt={business.name}
             className="h-full w-full object-cover"
             style={{ opacity: 0.65 }}
           />
+        ) : (
+          <div className="h-full w-full bg-stone-800" />
         )}
         <div
           className="absolute inset-0"
@@ -297,10 +299,18 @@ export function MenuPage() {
         {/* Logo + name overlay */}
         <div className="absolute bottom-0 left-0 right-0 flex items-end gap-3 p-4">
           <div
-            className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl border-2 font-serif text-lg font-bold text-white"
+            className="flex h-14 w-14 flex-shrink-0 overflow-hidden items-center justify-center rounded-2xl border-2 font-serif text-lg font-bold text-white"
             style={{ background: 'var(--brand-color)', borderColor: 'rgba(255,255,255,0.3)' }}
           >
-            {business.name.slice(0, 2).toUpperCase()}
+            {business.logo_url ? (
+              <img
+                src={business.logo_url}
+                alt={business.name}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <span>{business.name.slice(0, 2).toUpperCase()}</span>
+            )}
           </div>
           <div>
             <h1 className="font-serif text-xl font-bold leading-tight text-white">
