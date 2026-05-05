@@ -127,27 +127,63 @@ Ver `.env.example`. Las que empiezan con `VITE_` son accesibles en el frontend.
 - Schema SQL + RLS
 - .env.example
 
-### 🔲 Sprint 1 Día 2 — Supabase live
+### ✅ Sprint 1 Día 2 — Supabase live
 - Ejecutar schema.sql en dashboard
 - Generar database.types.ts con CLI
 - Crear primer usuario en Supabase Auth
 - Probar login → redirige a /admin
 - Probar /menu/:slug con datos reales
 
-### 🔲 Sprint 2 — Admin completo
-- DishListPage con tabla
-- EditItemForm con upload Cloudinary
-- CategoriesPage con drag & drop
-- SettingsPage (color, logo, datos del negocio)
+### ✅ Sprint 2 Día 2 — Admin conectado a Supabase real
+
+#### Qué funciona con Supabase real
+- **DashboardPage**: stats (platos, categorías, agotados) calculadas de `useItems` + `useCategories`. Banner si no hay negocio.
+- **SettingsPage**: INSERT (crear negocio) y UPDATE (editar) conectados a Supabase. Slug auto-generado y validado. Preview de URL en tiempo real. Feedback "✓ Guardado" por 2 segundos.
+- **CategoriesPage**: CRUD real — listar, inline editing (click → input → Enter/blur), nueva categoría inline, eliminar con confirm.
+- **MenuItemsPage**: lista real con `useItems`. Toggle disponible/agotado con optimistic update. Eliminar con confirm. Drawer `ItemForm` para crear/editar.
+- **QRPage**: QR generado con el slug real del negocio.
+- **MenuPage pública**: modo demo (`!VITE_SUPABASE_URL`) usa MOCK_MENU_DATA; modo real usa `useMenuData(slug)` con loading/404.
+
+#### Patrón de optimistic updates
+`useToggleItemAvailability` usa `onMutate` para actualizar la cache localmente antes de que el servidor responda, y `onError` para revertir si falla:
+```ts
+onMutate: async ({ id, available, businessId }) => {
+  await qc.cancelQueries({ queryKey: qk.items(businessId) })
+  const prev = qc.getQueryData(qk.items(businessId))
+  qc.setQueryData(qk.items(businessId), (old) =>
+    old?.map(item => item.id === id ? { ...item, available } : item)
+  )
+  return { prev }
+},
+onError: (_err, { businessId }, ctx) => {
+  qc.setQueryData(qk.items(businessId), ctx?.prev)
+},
+```
+
+#### Cómo funciona el upload a Cloudinary
+`src/components/admin/ImageUpload.tsx` sube via fetch POST sin firma:
+```
+POST https://api.cloudinary.com/v1_1/${VITE_CLOUDINARY_CLOUD_NAME}/image/upload
+FormData: { file, upload_preset: VITE_CLOUDINARY_UPLOAD_PRESET }
+```
+Valida tipo (JPG/PNG/WEBP) y tamaño (max 5MB) antes de subir. Retorna `secure_url`.
+
+#### Nuevos componentes
+- `src/components/admin/ImageUpload.tsx` — upload con drag & drop, preview, validación
+- `src/components/admin/ItemForm.tsx` — drawer desde la derecha, 480px en desktop, 100% en mobile
+
+#### Nuevos hooks en queries.ts
+- `useCreateBusiness()` — INSERT en businesses
+- `useUpdateCategory()` — UPDATE nombre de categoría
 
 ### 🔲 Sprint 3 — MenuPage pública pulida
-- Categorías sticky scroll
-- DishCard con modal bottom-sheet
-- WhatsApp FAB
+- Categorías sticky scroll ✅ (ya implementado)
+- DishCard con modal bottom-sheet ✅ (ya implementado)
+- WhatsApp FAB ✅ (ya implementado)
 - SEO meta tags por negocio
 
 ### 🔲 Sprint 4 — QR + Deploy
-- QRPage con qrcode.react
-- Descargar PNG / PDF
+- QRPage con qrcode.react ✅ (ya implementado)
+- Descargar PNG / PDF ✅ (ya implementado)
 - Deploy en Vercel
 - Dominio custom

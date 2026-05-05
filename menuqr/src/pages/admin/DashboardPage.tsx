@@ -1,5 +1,7 @@
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { MOCK_ITEMS, MOCK_CATEGORIES, MOCK_BUSINESS } from '../../lib/mock-data'
+import { useAuth } from '../../contexts/AuthContext'
+import { useMyBusiness, useItems, useCategories } from '../../lib/queries'
 import { menuUrl } from '../../lib/config'
 
 function StatCard({
@@ -20,7 +22,6 @@ function StatCard({
   )
 }
 
-// Minimal deterministic QR-looking SVG for display purposes
 function FakeQR({ size = 130 }: { size?: number }) {
   const cells = 21
   const cell = size / cells
@@ -71,18 +72,59 @@ function FakeQR({ size = 130 }: { size?: number }) {
 
 export function DashboardPage() {
   const navigate = useNavigate()
+  const { user } = useAuth()
 
-  const total = MOCK_ITEMS.length
-  const available = MOCK_ITEMS.filter((d) => d.available).length
-  const cats = MOCK_CATEGORIES.length
-  const soldOut = MOCK_ITEMS.filter((d) => !d.available)
-  const qrUrl = menuUrl(MOCK_BUSINESS.slug)
+  const { data: business, isLoading: bizLoading } = useMyBusiness(user?.id)
+  const { data: items } = useItems(business?.id)
+  const { data: categories } = useCategories(business?.id)
+
+  useEffect(() => {
+    if (business?.primary_color) {
+      document.documentElement.style.setProperty('--brand-color', business.primary_color)
+    }
+  }, [business?.primary_color])
+
+  if (bizLoading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-stone-300 border-t-stone-600" />
+      </div>
+    )
+  }
+
+  if (!business) {
+    return (
+      <div className="p-4 md:p-8">
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6">
+          <p className="mb-1 font-serif text-lg font-bold text-amber-900">
+            ¡Bienvenido a MenuQR!
+          </p>
+          <p className="mb-4 text-sm text-amber-700">
+            Completá los datos de tu negocio en Ajustes para empezar.
+          </p>
+          <button
+            onClick={() => navigate('/admin/settings')}
+            className="rounded-xl px-5 py-2.5 text-sm font-bold text-white transition hover:opacity-90"
+            style={{ background: 'var(--brand-color)' }}
+          >
+            Ir a Ajustes →
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  const total = items?.length ?? 0
+  const available = items?.filter(i => i.available).length ?? 0
+  const cats = categories?.length ?? 0
+  const soldOut = items?.filter(i => !i.available) ?? []
+  const qrUrl = menuUrl(business.slug)
 
   return (
     <div className="p-4 md:p-8">
       <div className="mb-6">
         <h1 className="mb-1 font-serif text-2xl font-bold text-stone-800">
-          Bienvenido, {MOCK_BUSINESS.name} 👋
+          Bienvenido, {business.name} 👋
         </h1>
         <p className="text-sm text-stone-500">
           Tu menú digital está activo y visible para tus clientes.
@@ -120,7 +162,7 @@ export function DashboardPage() {
                 ↓ Descargar QR
               </button>
               <button
-                onClick={() => navigate('/menu/la-estancia')}
+                onClick={() => navigate(`/menu/${business.slug}`)}
                 className="flex items-center gap-1.5 rounded-lg bg-stone-100 px-4 py-2 text-sm font-semibold text-stone-700 hover:bg-stone-200 transition"
               >
                 👁 Ver menú público
@@ -139,7 +181,7 @@ export function DashboardPage() {
               {soldOut.length} plato{soldOut.length > 1 ? 's' : ''} marcado{soldOut.length > 1 ? 's' : ''} como agotado{soldOut.length > 1 ? 's' : ''}
             </p>
             <p className="mt-0.5 text-xs text-orange-600">
-              {soldOut.map((d) => d.name).join(', ')}
+              {soldOut.map(d => d.name).join(', ')}
             </p>
           </div>
         </div>

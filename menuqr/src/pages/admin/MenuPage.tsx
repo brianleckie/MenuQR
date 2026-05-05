@@ -1,6 +1,16 @@
 import { useState } from 'react'
-import { MOCK_ITEMS, MOCK_CATEGORIES, formatPrice } from '../../lib/mock-data'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../../contexts/AuthContext'
+import {
+  useMyBusiness,
+  useItems,
+  useCategories,
+  useToggleItemAvailability,
+  useDeleteItem,
+} from '../../lib/queries'
+import { formatPrice } from '../../lib/mock-data'
 import type { Item } from '../../types'
+import { ItemForm } from '../../components/admin/ItemForm'
 
 interface ToggleProps {
   checked: boolean
@@ -30,26 +40,67 @@ function Toggle({ checked, onChange }: ToggleProps) {
 }
 
 export function MenuItemsPage() {
-  const [items, setItems] = useState<Item[]>(MOCK_ITEMS)
-  const [activeCat, setActiveCat] = useState(MOCK_CATEGORIES[0].id)
+  const navigate = useNavigate()
+  const { user } = useAuth()
 
-  const filtered = items.filter((d) => d.category_id === activeCat)
+  const { data: business, isLoading: bizLoading } = useMyBusiness(user?.id)
+  const { data: items, isLoading: itemsLoading } = useItems(business?.id)
+  const { data: categories } = useCategories(business?.id)
 
-  const toggleAvail = (id: string) => {
-    setItems((prev) =>
-      prev.map((d) => (d.id === id ? { ...d, available: !d.available } : d))
+  const toggleAvailability = useToggleItemAvailability()
+  const deleteItem = useDeleteItem()
+
+  const [activeCat, setActiveCat] = useState<string | null>(null)
+  // undefined = drawer closed, null = new item, Item = editing
+  const [drawerItem, setDrawerItem] = useState<Item | null | undefined>(undefined)
+
+  const cats = categories ?? []
+  const currentCat = activeCat ?? cats[0]?.id ?? null
+  const filtered = (items ?? []).filter(d => d.category_id === currentCat)
+
+  function handleToggle(item: Item) {
+    if (!business) return
+    toggleAvailability.mutate({ id: item.id, available: !item.available, businessId: business.id })
+  }
+
+  function handleDelete(item: Item) {
+    if (!business) return
+    if (!window.confirm(`¿Eliminar "${item.name}"?`)) return
+    deleteItem.mutate({ id: item.id, businessId: business.id })
+  }
+
+  if (bizLoading || itemsLoading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-stone-300 border-t-stone-600" />
+      </div>
     )
   }
 
-  const noop = (action: string) =>
-    alert(`${action} — disponible en la versión completa.`)
+  if (!business) {
+    return (
+      <div className="p-4 md:p-8">
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6">
+          <p className="mb-1 font-serif text-lg font-bold text-amber-900">Sin negocio configurado</p>
+          <p className="mb-4 text-sm text-amber-700">Primero configurá tu negocio en Ajustes.</p>
+          <button
+            onClick={() => navigate('/admin/settings')}
+            className="rounded-xl px-5 py-2.5 text-sm font-bold text-white transition hover:opacity-90"
+            style={{ background: 'var(--brand-color)' }}
+          >
+            Ir a Ajustes →
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="p-4 md:p-8">
       <div className="mb-5 flex items-center justify-between">
         <h1 className="font-serif text-2xl font-bold text-stone-800">Platos</h1>
         <button
-          onClick={() => noop('Nuevo plato')}
+          onClick={() => setDrawerItem(null)}
           className="flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-bold text-white"
           style={{ background: 'var(--brand-color)' }}
         >
@@ -58,160 +109,76 @@ export function MenuItemsPage() {
       </div>
 
       {/* Category tabs */}
-      <div className="mb-4 flex gap-1.5 overflow-x-auto pb-0.5">
-        {MOCK_CATEGORIES.map((cat) => (
+      {cats.length > 0 && (
+        <div className="mb-4 flex gap-1.5 overflow-x-auto pb-0.5">
+          {cats.map(cat => (
+            <button
+              key={cat.id}
+              onClick={() => setActiveCat(cat.id)}
+              className="flex-shrink-0 rounded-lg px-3.5 py-1.5 text-sm font-semibold transition"
+              style={{
+                background: currentCat === cat.id ? '#F5F1EC' : 'transparent',
+                color: currentCat === cat.id ? 'var(--brand-color)' : '#8C7B6A',
+                borderBottom: currentCat === cat.id ? '2px solid var(--brand-color)' : '2px solid transparent',
+              }}
+            >
+              {cat.name}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {cats.length === 0 && (
+        <div className="rounded-2xl bg-white py-10 text-center shadow-sm ring-1 ring-stone-100">
+          <p className="mb-3 text-sm text-stone-400">No hay categorías. Crealas primero.</p>
           <button
-            key={cat.id}
-            onClick={() => setActiveCat(cat.id)}
-            className="flex-shrink-0 rounded-lg px-3.5 py-1.5 text-sm font-semibold transition"
-            style={{
-              background: activeCat === cat.id ? '#F5F1EC' : 'transparent',
-              color: activeCat === cat.id ? 'var(--brand-color)' : '#8C7B6A',
-              borderBottom: activeCat === cat.id ? '2px solid var(--brand-color)' : '2px solid transparent',
-            }}
+            onClick={() => navigate('/admin/categories')}
+            className="rounded-xl px-4 py-2 text-sm font-semibold text-white"
+            style={{ background: 'var(--brand-color)' }}
           >
-            {cat.name}
+            Ir a Categorías
           </button>
-        ))}
-      </div>
+        </div>
+      )}
 
       {/* Mobile cards */}
-      <div className="md:hidden">
-        {filtered.length === 0 ? (
-          <div className="py-10 text-center text-sm text-stone-400">
-            No hay platos en esta categoría aún.
-          </div>
-        ) : (
-          <div className="grid gap-3">
-            {filtered.map((dish) => (
-              <div
-                key={dish.id}
-                className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-stone-100"
-              >
-                <div className="flex gap-3">
-                  <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl bg-stone-100">
-                    {dish.image_url && (
-                      <img
-                        src={dish.image_url}
-                        alt={dish.name}
-                        className="h-full w-full object-cover"
-                        style={{ filter: dish.available ? 'none' : 'grayscale(70%)' }}
-                      />
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-serif text-sm font-semibold text-stone-800">
-                      {dish.name}
-                    </p>
-                    {dish.short_desc && (
-                      <p className="line-clamp-1 text-xs text-stone-400">{dish.short_desc}</p>
-                    )}
-                    <p className="mt-0.5 text-sm font-bold" style={{ color: 'var(--brand-color)' }}>
-                      {formatPrice(dish.price)}
-                    </p>
-                  </div>
-                </div>
-                <div className="mt-3 flex items-center justify-between border-t border-stone-100 pt-3">
-                  <div className="flex items-center gap-2">
-                    <Toggle checked={dish.available} onChange={() => toggleAvail(dish.id)} />
-                    <span
-                      className="text-xs font-semibold"
-                      style={{ color: dish.available ? '#4A8A4A' : '#9E9E9E' }}
-                    >
-                      {dish.available ? 'Disponible' : 'Agotado'}
-                    </span>
-                  </div>
-                  <div className="flex gap-1">
-                    <button
-                      onClick={() => noop('Editar plato')}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-stone-100 text-stone-600"
-                      title="Editar"
-                    >
-                      ✏️
-                    </button>
-                    <button
-                      onClick={() => noop('Eliminar plato')}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-50 text-red-500"
-                      title="Eliminar"
-                    >
-                      🗑
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Desktop table */}
-      <div className="hidden overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-stone-100 md:block">
-        {filtered.length === 0 ? (
-          <div className="py-10 text-center text-sm text-stone-400">
-            No hay platos en esta categoría aún.
-          </div>
-        ) : (
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="border-b border-stone-100">
-                {['Plato', 'Precio', 'Disponible', ''].map((h) => (
-                  <th
-                    key={h}
-                    className="px-4 py-3 text-left text-[11.5px] font-semibold uppercase tracking-wide text-stone-400"
-                  >
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((dish, i) => (
-                <tr
+      {cats.length > 0 && (
+        <div className="md:hidden">
+          {filtered.length === 0 ? (
+            <div className="py-10 text-center text-sm text-stone-400">
+              No hay platos en esta categoría aún.
+            </div>
+          ) : (
+            <div className="grid gap-3">
+              {filtered.map(dish => (
+                <div
                   key={dish.id}
-                  className="transition-colors hover:bg-stone-50"
-                  style={{
-                    borderBottom: i < filtered.length - 1 ? '1px solid #F5F0EA' : 'none',
-                  }}
+                  className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-stone-100"
                 >
-                  {/* Name + thumbnail */}
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <div className="h-[34px] w-[46px] flex-shrink-0 overflow-hidden rounded-lg bg-stone-100">
-                        {dish.image_url && (
-                          <img
-                            src={dish.image_url}
-                            alt={dish.name}
-                            className="h-full w-full object-cover"
-                            style={{ filter: dish.available ? 'none' : 'grayscale(70%)' }}
-                          />
-                        )}
-                      </div>
-                      <div>
-                        <p className="font-serif text-sm font-semibold text-stone-800">
-                          {dish.name}
-                        </p>
-                        {dish.short_desc && (
-                          <p className="text-xs text-stone-400">{dish.short_desc}</p>
-                        )}
-                      </div>
+                  <div className="flex gap-3">
+                    <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl bg-stone-100">
+                      {dish.image_url && (
+                        <img
+                          src={dish.image_url}
+                          alt={dish.name}
+                          className="h-full w-full object-cover"
+                          style={{ filter: dish.available ? 'none' : 'grayscale(70%)' }}
+                        />
+                      )}
                     </div>
-                  </td>
-
-                  {/* Price */}
-                  <td
-                    className="whitespace-nowrap px-4 py-3 text-sm font-bold"
-                    style={{ color: 'var(--brand-color)' }}
-                  >
-                    {formatPrice(dish.price)}
-                  </td>
-
-                  {/* Toggle */}
-                  <td className="px-4 py-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-serif text-sm font-semibold text-stone-800">{dish.name}</p>
+                      {dish.short_desc && (
+                        <p className="line-clamp-1 text-xs text-stone-400">{dish.short_desc}</p>
+                      )}
+                      <p className="mt-0.5 text-sm font-bold" style={{ color: 'var(--brand-color)' }}>
+                        {formatPrice(dish.price)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between border-t border-stone-100 pt-3">
                     <div className="flex items-center gap-2">
-                      <Toggle
-                        checked={dish.available}
-                        onChange={() => toggleAvail(dish.id)}
-                      />
+                      <Toggle checked={dish.available} onChange={() => handleToggle(dish)} />
                       <span
                         className="text-xs font-semibold"
                         style={{ color: dish.available ? '#4A8A4A' : '#9E9E9E' }}
@@ -219,33 +186,130 @@ export function MenuItemsPage() {
                         {dish.available ? 'Disponible' : 'Agotado'}
                       </span>
                     </div>
-                  </td>
-
-                  {/* Actions */}
-                  <td className="px-4 py-3">
                     <div className="flex gap-1">
                       <button
-                        onClick={() => noop('Editar plato')}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-stone-100 text-stone-600 transition hover:bg-stone-200"
+                        onClick={() => setDrawerItem(dish)}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-stone-100 text-stone-600"
                         title="Editar"
                       >
                         ✏️
                       </button>
                       <button
-                        onClick={() => noop('Eliminar plato')}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-50 text-red-500 transition hover:bg-red-100"
+                        onClick={() => handleDelete(dish)}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-50 text-red-500"
                         title="Eliminar"
                       >
                         🗑
                       </button>
                     </div>
-                  </td>
-                </tr>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Desktop table */}
+      {cats.length > 0 && (
+        <div className="hidden overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-stone-100 md:block">
+          {filtered.length === 0 ? (
+            <div className="py-10 text-center text-sm text-stone-400">
+              No hay platos en esta categoría aún.
+            </div>
+          ) : (
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="border-b border-stone-100">
+                  {['Plato', 'Precio', 'Disponible', ''].map(h => (
+                    <th
+                      key={h}
+                      className="px-4 py-3 text-left text-[11.5px] font-semibold uppercase tracking-wide text-stone-400"
+                    >
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((dish, i) => (
+                  <tr
+                    key={dish.id}
+                    className="transition-colors hover:bg-stone-50"
+                    style={{ borderBottom: i < filtered.length - 1 ? '1px solid #F5F0EA' : 'none' }}
+                  >
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="h-[34px] w-[46px] flex-shrink-0 overflow-hidden rounded-lg bg-stone-100">
+                          {dish.image_url && (
+                            <img
+                              src={dish.image_url}
+                              alt={dish.name}
+                              className="h-full w-full object-cover"
+                              style={{ filter: dish.available ? 'none' : 'grayscale(70%)' }}
+                            />
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-serif text-sm font-semibold text-stone-800">{dish.name}</p>
+                          {dish.short_desc && (
+                            <p className="text-xs text-stone-400">{dish.short_desc}</p>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                    <td
+                      className="whitespace-nowrap px-4 py-3 text-sm font-bold"
+                      style={{ color: 'var(--brand-color)' }}
+                    >
+                      {formatPrice(dish.price)}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <Toggle checked={dish.available} onChange={() => handleToggle(dish)} />
+                        <span
+                          className="text-xs font-semibold"
+                          style={{ color: dish.available ? '#4A8A4A' : '#9E9E9E' }}
+                        >
+                          {dish.available ? 'Disponible' : 'Agotado'}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => setDrawerItem(dish)}
+                          className="flex h-8 w-8 items-center justify-center rounded-lg bg-stone-100 text-stone-600 transition hover:bg-stone-200"
+                          title="Editar"
+                        >
+                          ✏️
+                        </button>
+                        <button
+                          onClick={() => handleDelete(dish)}
+                          className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-50 text-red-500 transition hover:bg-red-100"
+                          title="Eliminar"
+                        >
+                          🗑
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
+
+      {/* Item drawer */}
+      {drawerItem !== undefined && (
+        <ItemForm
+          item={drawerItem}
+          businessId={business.id}
+          categories={cats}
+          onClose={() => setDrawerItem(undefined)}
+        />
+      )}
     </div>
   )
 }
