@@ -176,6 +176,16 @@ Valida tipo (JPG/PNG/WEBP) y tamaño (max 5MB) antes de subir. Retorna `secure_u
 - `useCreateBusiness()` — INSERT en businesses
 - `useUpdateCategory()` — UPDATE nombre de categoría
 
+### ✅ Sprint 2 Día 3 — Logo y foto de portada
+
+#### Qué se agregó
+- **SettingsPage**: campos de upload para `logo_url` (preview circular 64px) y `cover_url` (preview 16:9). Ambos se guardan junto con el resto del negocio en `useUpdateBusiness` / `useCreateBusiness`.
+- **MenuPage pública**: logo usa `logo_url` si existe, sino las iniciales. Cover usa `cover_url` si existe, sino fondo sólido `#2A1810`.
+- **ImageUpload**: prop opcional `previewRatio` (default `'66.67%'` = 3:2). Para cover se pasa `'56.25%'` (16:9).
+
+#### Patrón reutilizado
+`ImageUpload` se usa para los tres tipos de imagen sin modificar su lógica de upload — solo varía el ratio del preview y cómo se integra en el formulario.
+
 ### 🔲 Sprint 3 — MenuPage pública pulida
 - Categorías sticky scroll ✅ (ya implementado)
 - DishCard con modal bottom-sheet ✅ (ya implementado)

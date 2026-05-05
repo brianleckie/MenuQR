@@ -4,6 +4,8 @@ interface ImageUploadProps {
   value: string | null
   onUpload: (url: string) => void
   onClear: () => void
+  /** CSS padding-bottom for the preview aspect ratio. Default: '66.67%' (3:2). Use '56.25%' for 16:9. */
+  previewRatio?: string
 }
 
 const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME as string
@@ -11,7 +13,7 @@ const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET as string
 const MAX_BYTES = 5 * 1024 * 1024
 const ACCEPTED = ['image/jpeg', 'image/png', 'image/webp']
 
-export function ImageUpload({ value, onUpload, onClear }: ImageUploadProps) {
+export function ImageUpload({ value, onUpload, onClear, previewRatio = '66.67%' }: ImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -61,7 +63,7 @@ export function ImageUpload({ value, onUpload, onClear }: ImageUploadProps) {
 
   if (value) {
     return (
-      <div className="relative overflow-hidden rounded-xl bg-stone-100" style={{ paddingBottom: '66.67%' }}>
+      <div className="relative overflow-hidden rounded-xl bg-stone-100" style={{ paddingBottom: previewRatio }}>
         <img
           src={value}
           alt="Vista previa"

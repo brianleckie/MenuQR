@@ -2,6 +2,7 @@ import { useEffect, useState, type ChangeEvent } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useMyBusiness, useCreateBusiness, useUpdateBusiness } from '../../lib/queries'
 import { APP_URL } from '../../lib/config'
+import { ImageUpload } from '../../components/admin/ImageUpload'
 
 const inputClass =
   'w-full rounded-xl border border-stone-200 bg-stone-50 px-4 py-2.5 text-sm text-stone-800 outline-none transition focus:border-[var(--brand-color)] focus:ring-2 focus:ring-[var(--brand-color)]/20'
@@ -16,6 +17,8 @@ interface SettingsForm {
   whatsapp: string
   address: string
   hours: string
+  logo_url: string | null
+  cover_url: string | null
 }
 
 function slugify(s: string): string {
@@ -45,6 +48,8 @@ export function SettingsPage() {
     whatsapp: '',
     address: '',
     hours: '',
+    logo_url: null,
+    cover_url: null,
   })
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -60,6 +65,8 @@ export function SettingsPage() {
         whatsapp: business.whatsapp ?? '',
         address: business.address ?? '',
         hours: business.hours ?? '',
+        logo_url: business.logo_url,
+        cover_url: business.cover_url,
       })
       setSlugManuallyEdited(true)
       document.documentElement.style.setProperty('--brand-color', business.primary_color)
@@ -109,8 +116,8 @@ export function SettingsPage() {
       whatsapp: form.whatsapp.trim() || null,
       address: form.address.trim() || null,
       hours: form.hours.trim() || null,
-      logo_url: business?.logo_url ?? null,
-      cover_url: business?.cover_url ?? null,
+      logo_url: form.logo_url,
+      cover_url: form.cover_url,
     }
 
     if (business) {
@@ -261,6 +268,48 @@ export function SettingsPage() {
             <p className="mt-2 text-xs text-stone-400">
               El cambio de color se aplica en tiempo real en toda la interfaz.
             </p>
+          </div>
+
+          {/* Logo */}
+          <div className="mb-5">
+            <label className={labelClass}>Logo del restaurante</label>
+            <p className="mb-2 text-xs text-stone-400">
+              Se muestra en el menú público. Recomendado: imagen cuadrada, mínimo 200×200px.
+            </p>
+            <div className="flex items-center gap-4">
+              {/* Circular preview */}
+              <div
+                className="flex h-16 w-16 flex-shrink-0 overflow-hidden items-center justify-center rounded-full border-2 border-stone-200 font-serif text-lg font-bold text-white"
+                style={{ background: form.logo_url ? 'transparent' : 'var(--brand-color)' }}
+              >
+                {form.logo_url ? (
+                  <img src={form.logo_url} alt="Logo" className="h-full w-full object-cover" />
+                ) : (
+                  <span>{form.name ? form.name.slice(0, 2).toUpperCase() : '?'}</span>
+                )}
+              </div>
+              <div className="flex-1">
+                <ImageUpload
+                  value={form.logo_url}
+                  onUpload={url => { setForm(f => ({ ...f, logo_url: url })); setSaved(false) }}
+                  onClear={() => { setForm(f => ({ ...f, logo_url: null })); setSaved(false) }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Cover */}
+          <div className="mb-5">
+            <label className={labelClass}>Foto de portada</label>
+            <p className="mb-2 text-xs text-stone-400">
+              Imagen de fondo del header en el menú público. Recomendado: 1200×400px o más ancho.
+            </p>
+            <ImageUpload
+              value={form.cover_url}
+              onUpload={url => { setForm(f => ({ ...f, cover_url: url })); setSaved(false) }}
+              onClear={() => { setForm(f => ({ ...f, cover_url: null })); setSaved(false) }}
+              previewRatio="56.25%"
+            />
           </div>
 
           {/* Preview */}
