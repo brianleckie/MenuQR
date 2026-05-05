@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { useMyBusiness, useItems, useCategories } from '../../lib/queries'
 import { menuUrl } from '../../lib/config'
@@ -93,25 +93,7 @@ export function DashboardPage() {
   }
 
   if (!business) {
-    return (
-      <div className="p-4 md:p-8">
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6">
-          <p className="mb-1 font-serif text-lg font-bold text-amber-900">
-            ¡Bienvenido a MenuQR!
-          </p>
-          <p className="mb-4 text-sm text-amber-700">
-            Completá los datos de tu negocio en Ajustes para empezar.
-          </p>
-          <button
-            onClick={() => navigate('/admin/settings')}
-            className="rounded-xl px-5 py-2.5 text-sm font-bold text-white transition hover:opacity-90"
-            style={{ background: 'var(--brand-color)' }}
-          >
-            Ir a Ajustes →
-          </button>
-        </div>
-      </div>
-    )
+    return <Navigate to="/admin/onboarding" replace />
   }
 
   const total = items?.length ?? 0

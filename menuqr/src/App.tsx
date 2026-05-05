@@ -9,6 +9,7 @@ import { MenuItemsPage } from './pages/admin/MenuPage'
 import { CategoriesPage } from './pages/admin/CategoriesPage'
 import { QRPage } from './pages/admin/QRPage'
 import { SettingsPage } from './pages/admin/SettingsPage'
+import { OnboardingPage } from './pages/admin/OnboardingPage'
 import { MenuPage } from './pages/menu/MenuPage'
 
 const queryClient = new QueryClient({
@@ -27,6 +28,7 @@ export default function App() {
             <Route path="/menu/:slug" element={<MenuPage />} />
             <Route path="/admin/login" element={<LoginPage />} />
             <Route element={<ProtectedRoute />}>
+              <Route path="/admin/onboarding" element={<OnboardingPage />} />
               <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<DashboardPage />} />
                 <Route path="menu" element={<MenuItemsPage />} />

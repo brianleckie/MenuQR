@@ -95,6 +95,7 @@ supabase/
 | `/admin/categories` | CategoriesPage | ✅ |
 | `/admin/qr` | QRPage | ✅ |
 | `/admin/settings` | SettingsPage | ✅ |
+| `/admin/onboarding` | OnboardingPage | ✅ |
 | `/menu/:slug` | MenuPage (pública) | ❌ |
 
 ## Supabase
@@ -186,11 +187,43 @@ Valida tipo (JPG/PNG/WEBP) y tamaño (max 5MB) antes de subir. Retorna `secure_u
 #### Patrón reutilizado
 `ImageUpload` se usa para los tres tipos de imagen sin modificar su lógica de upload — solo varía el ratio del preview y cómo se integra en el formulario.
 
-### 🔲 Sprint 3 — MenuPage pública pulida
-- Categorías sticky scroll ✅ (ya implementado)
-- DishCard con modal bottom-sheet ✅ (ya implementado)
-- WhatsApp FAB ✅ (ya implementado)
-- SEO meta tags por negocio
+### ✅ Sprint 2 Día 4 — Onboarding + SEO
+
+#### OnboardingPage (`/admin/onboarding`)
+- Wizard full-screen para usuarios sin negocio
+- Ruta fuera de `AdminLayout` pero dentro de `ProtectedRoute` (no muestra sidebar)
+- `DashboardPage` redirige a `/admin/onboarding` si `business === null`
+- Campos: nombre (required), slug (auto-generado con `slugify()`, editable), color, WhatsApp (optional)
+- Usa `useCreateBusiness()` — detecta error de slug duplicado por mensaje 'duplicate'/'unique'
+
+#### SEO meta tags
+`src/pages/menu/MenuPage.tsx` aplica por negocio via `setMetaProperty()`:
+- `document.title` → `"${business.name} | MenuQR"`, limpia en unmount
+- `og:title`, `og:description` (tagline o fallback), `og:type`, `og:image` (cover_url si existe)
+
+### ✅ Sprint 3 — MenuPage pública pulida
+
+#### Qué se implementó
+- **Scroll spy**: `IntersectionObserver` por sección (`rootMargin: '-20% 0px -70% 0px'`). Actualiza `activeCategory` mientras el usuario scrollea.
+- **Auto-scroll de pills**: `useEffect` sobre `activeCategory` hace `scrollIntoView({ inline: 'center' })` en el pill activo usando `data-cat` attribute.
+- **DishCard fadeInUp**: clase `dish-card-enter` + `animationDelay` staggered (0–7 × 50ms). Keyframe definido en `index.css`.
+- **Address en info bar**: muestra `📍 {business.address}` si existe.
+- **Empty state por categoría**: "No hay platos disponibles en esta sección por ahora." si `cat.items.length === 0`.
+- **Footer**: "Menú digital por MenuQR" en `var(--brand-color)` al final de las secciones.
+- **DishModal**: ya existía — no modificado.
+
+#### Patrones de implementación
+```ts
+// Scroll spy
+const observer = new IntersectionObserver(
+  ([entry]) => { if (entry.isIntersecting) setActiveCategory(cat.id) },
+  { rootMargin: '-20% 0px -70% 0px', threshold: 0 }
+)
+
+// Auto-scroll pill
+const pill = pillsRef.current?.querySelector(`[data-cat="${activeCategory}"]`)
+pill?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+```
 
 ### 🔲 Sprint 4 — QR + Deploy
 - QRPage con qrcode.react ✅ (ya implementado)

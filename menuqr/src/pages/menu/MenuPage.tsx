@@ -28,19 +28,22 @@ function WhatsAppIcon({ size = 18 }: { size?: number }) {
 
 interface DishCardProps {
   dish: Item
+  index: number
   onClick: (dish: Item) => void
 }
 
-function DishCard({ dish, onClick }: DishCardProps) {
+function DishCard({ dish, index, onClick }: DishCardProps) {
   const [imgErr, setImgErr] = useState(false)
+  const delay = Math.min(index, 7) * 0.05
 
   return (
     <div
       onClick={() => dish.available && onClick(dish)}
-      className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-stone-100 transition-transform"
+      className="dish-card-enter overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-stone-100 transition-transform"
       style={{
         opacity: dish.available ? 1 : 0.72,
         cursor: dish.available ? 'pointer' : 'default',
+        animationDelay: `${delay}s`,
       }}
     >
       {/* Photo */}
@@ -211,6 +214,16 @@ function DishModal({ dish, whatsapp, onClose }: DishModalProps) {
 
 // ── Public Menu ───────────────────────────────────────────────────────────────
 
+function setMetaProperty(property: string, content: string) {
+  let el = document.querySelector(`meta[property="${property}"]`)
+  if (!el) {
+    el = document.createElement('meta')
+    el.setAttribute('property', property)
+    document.head.appendChild(el)
+  }
+  el.setAttribute('content', content)
+}
+
 export function MenuPage() {
   const { slug } = useParams<{ slug: string }>()
 
@@ -224,7 +237,9 @@ export function MenuPage() {
   const [activeCategory, setActiveCategory] = useState<string>('')
   const [selectedDish, setSelectedDish] = useState<Item | null>(null)
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  const pillsRef = useRef<HTMLDivElement>(null)
 
+  // Apply brand color
   useEffect(() => {
     if (data?.business.primary_color) {
       document.documentElement.style.setProperty('--brand-color', data.business.primary_color)
@@ -234,18 +249,58 @@ export function MenuPage() {
     }
   }, [data?.business.primary_color])
 
+  // SEO meta tags
+  useEffect(() => {
+    if (!data) return
+    const { business } = data
+    document.title = `${business.name} | MenuQR`
+    setMetaProperty('og:title', business.name)
+    setMetaProperty('og:description', business.tagline ?? 'Mirá nuestro menú digital')
+    setMetaProperty('og:type', 'website')
+    if (business.cover_url) setMetaProperty('og:image', business.cover_url)
+    return () => {
+      document.title = 'MenuQR'
+    }
+  }, [data])
+
+  // Set initial active category
   useEffect(() => {
     if (data?.categories.length && !activeCategory) {
       setActiveCategory(data.categories[0].id)
     }
   }, [data, activeCategory])
 
+  // Scroll spy via IntersectionObserver
+  useEffect(() => {
+    if (!data) return
+    const observers: IntersectionObserver[] = []
+
+    data.categories.forEach((cat) => {
+      const el = sectionRefs.current[cat.id]
+      if (!el) return
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) setActiveCategory(cat.id)
+        },
+        { rootMargin: '-20% 0px -70% 0px', threshold: 0 }
+      )
+      observer.observe(el)
+      observers.push(observer)
+    })
+
+    return () => observers.forEach((o) => o.disconnect())
+  }, [data])
+
+  // Auto-scroll active pill into view
+  useEffect(() => {
+    if (!activeCategory) return
+    const pill = pillsRef.current?.querySelector(`[data-cat="${activeCategory}"]`)
+    pill?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+  }, [activeCategory])
+
   const scrollToCategory = (id: string) => {
     setActiveCategory(id)
-    const el = sectionRefs.current[id]
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }
+    sectionRefs.current[id]?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
   if (isLoading) {
@@ -324,34 +379,44 @@ export function MenuPage() {
       </div>
 
       {/* Info bar */}
-      {(business.hours || business.whatsapp) && (
-        <div className="flex items-center justify-between px-4 pt-2.5">
+      <div className="flex flex-wrap items-center justify-between gap-2 px-4 pt-2.5">
+        <div className="flex flex-col gap-0.5">
           {business.hours && (
             <div className="flex items-center gap-1.5 text-[11.5px] text-stone-500">
               <ClockIcon />
               {business.hours}
             </div>
           )}
-          {business.whatsapp && (
-            <a
-              href={`https://wa.me/${business.whatsapp}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold text-white no-underline"
-              style={{ background: '#25D366' }}
-            >
-              <WhatsAppIcon size={12} /> WhatsApp
-            </a>
+          {business.address && (
+            <div className="flex items-center gap-1.5 text-[11px] text-stone-400">
+              <span>📍</span> {business.address}
+            </div>
           )}
         </div>
-      )}
+        {business.whatsapp && (
+          <a
+            href={`https://wa.me/${business.whatsapp}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold text-white no-underline"
+            style={{ background: '#25D366' }}
+          >
+            <WhatsAppIcon size={12} /> WhatsApp
+          </a>
+        )}
+      </div>
 
       {/* Sticky category pills */}
       <div className="sticky top-0 z-10 border-b border-stone-100 bg-stone-50 pb-3 pt-3">
-        <div className="flex gap-2 overflow-x-auto px-4" style={{ scrollbarWidth: 'none' }}>
+        <div
+          ref={pillsRef}
+          className="flex gap-2 overflow-x-auto px-4"
+          style={{ scrollbarWidth: 'none' }}
+        >
           {categories.map((cat) => (
             <button
               key={cat.id}
+              data-cat={cat.id}
               onClick={() => scrollToCategory(cat.id)}
               className="flex-shrink-0 rounded-full px-4 py-1.5 text-sm font-semibold transition"
               style={{
@@ -377,13 +442,25 @@ export function MenuPage() {
               {cat.name}
               <span className="h-px flex-1 bg-stone-200" />
             </h2>
-            <div className="grid grid-cols-2 gap-3">
-              {cat.items.map((dish) => (
-                <DishCard key={dish.id} dish={dish} onClick={setSelectedDish} />
-              ))}
-            </div>
+            {cat.items.length === 0 ? (
+              <div className="col-span-2 py-6 text-center text-sm text-stone-400">
+                No hay platos disponibles en esta sección por ahora.
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-3">
+                {cat.items.map((dish, i) => (
+                  <DishCard key={dish.id} dish={dish} index={i} onClick={setSelectedDish} />
+                ))}
+              </div>
+            )}
           </div>
         ))}
+
+        {/* Footer */}
+        <div className="mt-8 pb-4 text-center text-[11px] text-stone-300">
+          Menú digital por{' '}
+          <span style={{ color: 'var(--brand-color)' }}>MenuQR</span>
+        </div>
       </div>
 
       {/* WhatsApp FAB */}
