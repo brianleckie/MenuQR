@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import {
@@ -8,8 +8,23 @@ import {
   useCreateCategory,
   useUpdateCategory,
   useDeleteCategory,
+  useReorderCategories,
 } from '../../lib/queries'
 import type { Category } from '../../types'
+import {
+  DndContext,
+  type DragEndEvent,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  arrayMove,
+} from '@dnd-kit/sortable'
+import { SortableItem, DragHandle } from '../../components/ui/SortableItem'
 
 export function CategoriesPage() {
   const navigate = useNavigate()
@@ -21,12 +36,36 @@ export function CategoriesPage() {
   const createCategory = useCreateCategory()
   const updateCategory = useUpdateCategory()
   const deleteCategory = useDeleteCategory()
+  const reorderCategories = useReorderCategories()
 
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingName, setEditingName] = useState('')
   const [addingNew, setAddingNew] = useState(false)
   const [newName, setNewName] = useState('')
+  const [localCategories, setLocalCategories] = useState<Category[]>([])
   const newInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    setLocalCategories(categories ?? [])
+  }, [categories])
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } })
+  )
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    if (!over || active.id === over.id || !business) return
+    const oldIndex = localCategories.findIndex(c => c.id === active.id)
+    const newIndex = localCategories.findIndex(c => c.id === over.id)
+    const reordered = arrayMove(localCategories, oldIndex, newIndex)
+    setLocalCategories(reordered)
+    reorderCategories.mutate({
+      updates: reordered.map((cat, i) => ({ id: cat.id, sort_order: (i + 1) * 10 })),
+      businessId: business.id,
+    })
+  }
 
   function startEdit(cat: Category) {
     setEditingId(cat.id)
@@ -59,7 +98,7 @@ export function CategoriesPage() {
         {
           business_id: business.id,
           name,
-          sort_order: (categories?.length ?? 0) + 1,
+          sort_order: (localCategories.length + 1) * 10,
         },
         { onSuccess: () => { setAddingNew(false); setNewName('') } }
       )
@@ -93,9 +132,7 @@ export function CategoriesPage() {
       <div className="p-4 md:p-8">
         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6">
           <p className="mb-1 font-serif text-lg font-bold text-amber-900">Sin negocio configurado</p>
-          <p className="mb-4 text-sm text-amber-700">
-            Primero configurá tu negocio en Ajustes.
-          </p>
+          <p className="mb-4 text-sm text-amber-700">Primero configurá tu negocio en Ajustes.</p>
           <button
             onClick={() => navigate('/admin/settings')}
             className="rounded-xl px-5 py-2.5 text-sm font-bold text-white transition hover:opacity-90"
@@ -108,15 +145,13 @@ export function CategoriesPage() {
     )
   }
 
-  const cats = categories ?? []
-
   return (
     <div className="p-4 md:p-8">
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="font-serif text-2xl font-bold text-stone-800">Categorías</h1>
           <p className="mt-1 text-sm text-stone-500">
-            {cats.length} sección{cats.length !== 1 ? 'es' : ''} en tu menú
+            {localCategories.length} sección{localCategories.length !== 1 ? 'es' : ''} en tu menú
           </p>
         </div>
         <button
@@ -128,99 +163,109 @@ export function CategoriesPage() {
         </button>
       </div>
 
-      <div className="grid gap-3">
-        {cats.map((cat, i) => {
-          const count = items?.filter(item => item.category_id === cat.id).length ?? 0
-          const avail = items?.filter(item => item.category_id === cat.id && item.available).length ?? 0
-          const isEditing = editingId === cat.id
+      <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+        <SortableContext
+          items={localCategories.map(c => c.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          <div className="grid gap-3">
+            {localCategories.map((cat, i) => {
+              const count = items?.filter(item => item.category_id === cat.id).length ?? 0
+              const avail = items?.filter(item => item.category_id === cat.id && item.available).length ?? 0
+              const isEditing = editingId === cat.id
 
-          return (
-            <div
-              key={cat.id}
-              className="flex items-center justify-between rounded-2xl bg-white px-5 py-4 shadow-sm ring-1 ring-stone-100"
-            >
-              <div className="flex items-center gap-4 min-w-0 flex-1">
+              return (
+                <SortableItem key={cat.id} id={cat.id}>
+                  {(dragHandleProps) => (
+                    <div className="flex items-center justify-between rounded-2xl bg-white px-4 py-4 shadow-sm ring-1 ring-stone-100">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <DragHandle {...dragHandleProps} />
+                        <div
+                          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl text-sm font-bold text-white"
+                          style={{ background: 'var(--brand-color)' }}
+                        >
+                          {i + 1}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          {isEditing ? (
+                            <input
+                              autoFocus
+                              value={editingName}
+                              onChange={e => setEditingName(e.target.value)}
+                              onBlur={() => saveEdit(cat)}
+                              onKeyDown={e => handleEditKeyDown(e, cat)}
+                              className="w-full rounded-lg border border-stone-300 bg-stone-50 px-3 py-1.5 font-serif text-base font-semibold text-stone-800 outline-none focus:border-[var(--brand-color)] focus:ring-2 focus:ring-[var(--brand-color)]/20"
+                            />
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => startEdit(cat)}
+                              className="text-left font-serif text-base font-semibold text-stone-800 hover:text-[var(--brand-color)] transition-colors"
+                              title="Clic para editar"
+                            >
+                              {cat.name}
+                            </button>
+                          )}
+                          <p className="text-xs text-stone-400">
+                            {avail} de {count} disponibles
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <span className="rounded-full bg-stone-100 px-3 py-1 text-xs font-semibold text-stone-600">
+                          {count} platos
+                        </span>
+                        <button
+                          onClick={() => handleDelete(cat)}
+                          disabled={deleteCategory.isPending}
+                          className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-50 text-red-500 transition hover:bg-red-100 disabled:opacity-50"
+                          title="Eliminar categoría"
+                        >
+                          🗑
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </SortableItem>
+              )
+            })}
+
+            {/* Inline new category */}
+            {addingNew && (
+              <div className="flex items-center gap-3 rounded-2xl bg-white px-4 py-4 shadow-sm ring-2 ring-[var(--brand-color)]/30">
+                <div className="w-4 flex-shrink-0" />
                 <div
                   className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl text-sm font-bold text-white"
                   style={{ background: 'var(--brand-color)' }}
                 >
-                  {i + 1}
+                  {localCategories.length + 1}
                 </div>
-                <div className="min-w-0 flex-1">
-                  {isEditing ? (
-                    <input
-                      autoFocus
-                      value={editingName}
-                      onChange={e => setEditingName(e.target.value)}
-                      onBlur={() => saveEdit(cat)}
-                      onKeyDown={e => handleEditKeyDown(e, cat)}
-                      className="w-full rounded-lg border border-stone-300 bg-stone-50 px-3 py-1.5 font-serif text-base font-semibold text-stone-800 outline-none focus:border-[var(--brand-color)] focus:ring-2 focus:ring-[var(--brand-color)]/20"
-                    />
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => startEdit(cat)}
-                      className="text-left font-serif text-base font-semibold text-stone-800 hover:text-[var(--brand-color)] transition-colors"
-                      title="Clic para editar"
-                    >
-                      {cat.name}
-                    </button>
-                  )}
-                  <p className="text-xs text-stone-400">
-                    {avail} de {count} disponibles
-                  </p>
-                </div>
+                <input
+                  ref={newInputRef}
+                  value={newName}
+                  onChange={e => setNewName(e.target.value)}
+                  onBlur={saveNew}
+                  onKeyDown={handleNewKeyDown}
+                  placeholder="Nombre de la categoría..."
+                  className="flex-1 rounded-lg border border-stone-300 bg-stone-50 px-3 py-1.5 font-serif text-base font-semibold text-stone-800 outline-none focus:border-[var(--brand-color)] focus:ring-2 focus:ring-[var(--brand-color)]/20"
+                />
+                {createCategory.isPending && (
+                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-stone-300 border-t-stone-600" />
+                )}
               </div>
+            )}
 
-              <div className="flex items-center gap-2">
-                <span className="rounded-full bg-stone-100 px-3 py-1 text-xs font-semibold text-stone-600">
-                  {count} platos
-                </span>
-                <button
-                  onClick={() => handleDelete(cat)}
-                  disabled={deleteCategory.isPending}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-50 text-red-500 transition hover:bg-red-100 disabled:opacity-50"
-                  title="Eliminar categoría"
-                >
-                  🗑
-                </button>
+            {localCategories.length === 0 && !addingNew && (
+              <div className="rounded-2xl bg-white py-10 text-center shadow-sm ring-1 ring-stone-100">
+                <p className="text-sm text-stone-400">
+                  No hay categorías aún. Crea la primera para organizar tu menú.
+                </p>
               </div>
-            </div>
-          )
-        })}
-
-        {/* Inline new category */}
-        {addingNew && (
-          <div className="flex items-center gap-4 rounded-2xl bg-white px-5 py-4 shadow-sm ring-2 ring-[var(--brand-color)]/30">
-            <div
-              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl text-sm font-bold text-white"
-              style={{ background: 'var(--brand-color)' }}
-            >
-              {cats.length + 1}
-            </div>
-            <input
-              ref={newInputRef}
-              value={newName}
-              onChange={e => setNewName(e.target.value)}
-              onBlur={saveNew}
-              onKeyDown={handleNewKeyDown}
-              placeholder="Nombre de la categoría..."
-              className="flex-1 rounded-lg border border-stone-300 bg-stone-50 px-3 py-1.5 font-serif text-base font-semibold text-stone-800 outline-none focus:border-[var(--brand-color)] focus:ring-2 focus:ring-[var(--brand-color)]/20"
-            />
-            {createCategory.isPending && (
-              <div className="h-5 w-5 animate-spin rounded-full border-2 border-stone-300 border-t-stone-600" />
             )}
           </div>
-        )}
-
-        {cats.length === 0 && !addingNew && (
-          <div className="rounded-2xl bg-white py-10 text-center shadow-sm ring-1 ring-stone-100">
-            <p className="text-sm text-stone-400">
-              No hay categorías aún. Crea la primera para organizar tu menú.
-            </p>
-          </div>
-        )}
-      </div>
+        </SortableContext>
+      </DndContext>
     </div>
   )
 }
