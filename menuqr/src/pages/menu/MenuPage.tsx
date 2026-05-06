@@ -627,16 +627,6 @@ export function MenuPage() {
 
   return (
     <div className="min-h-screen bg-stone-50 font-sans">
-      {/* MenuQR promo button — top right */}
-      <button
-        onClick={() => setPromoOpen(true)}
-        className="fixed right-4 top-4 z-40 flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 shadow-md transition hover:shadow-lg"
-        style={{ color: '#1C1410' }}
-      >
-        <MenuQRLogo size={16} showText={false} />
-        <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '-0.01em' }}>MenuQR ✨</span>
-      </button>
-
       {/* Cover */}
       <div className="relative" style={{ height: 180, background: '#2A1810', overflow: 'hidden' }}>
         {business.cover_url ? (
@@ -744,6 +734,17 @@ export function MenuPage() {
             </div>
           </div>
         ))}
+
+        {/* MenuQR promo — inline at end of menu */}
+        <button
+          onClick={() => setPromoOpen(true)}
+          className="mt-10 flex w-full items-center justify-center gap-2 rounded-2xl border border-stone-200 bg-white py-3.5 text-sm text-stone-500 shadow-sm transition hover:bg-stone-50"
+        >
+          <MenuQRLogo size={18} showText={false} />
+          <span style={{ fontSize: 12, fontWeight: 600 }}>
+            Creado con <span style={{ color: 'var(--brand-color)' }}>MenuQR</span> · ¿Querés tu menú digital?
+          </span>
+        </button>
       </div>
 
       {/* FAB: cart when items > 0, WhatsApp otherwise */}
