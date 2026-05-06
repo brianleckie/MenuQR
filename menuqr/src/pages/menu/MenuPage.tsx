@@ -5,6 +5,7 @@ import { MOCK_MENU_DATA, formatPrice } from '../../lib/mock-data'
 import type { Item, MenuData } from '../../types'
 import { useCart } from '../../contexts/CartContext'
 import { MenuQRLogo } from '../../components/ui/MenuQRLogo'
+import { imgPresets } from '../../lib/cloudinary'
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 
@@ -137,7 +138,7 @@ function DishCard({ dish, cartQuantity, onAdd, onIncrement, onDecrement, onClick
       <div className="relative overflow-hidden bg-stone-100" style={{ paddingBottom: '66.67%' }}>
         {!imgErr && dish.image_url ? (
           <img
-            src={dish.image_url}
+            src={imgPresets.dishCard(dish.image_url) ?? dish.image_url}
             alt={dish.name}
             onError={() => setImgErr(true)}
             className="absolute inset-0 h-full w-full object-cover"
@@ -260,7 +261,7 @@ function DishModal({ dish, whatsapp, cartQuantity, onAdd, onIncrement, onDecreme
         <div className="relative mx-4 overflow-hidden rounded-2xl bg-stone-100" style={{ paddingBottom: '56%' }}>
           {!imgErr && dish.image_url ? (
             <img
-              src={dish.image_url}
+              src={imgPresets.dishModal(dish.image_url) ?? dish.image_url}
               alt={dish.name}
               onError={() => setImgErr(true)}
               className="absolute inset-0 h-full w-full object-cover"
@@ -631,7 +632,7 @@ export function MenuPage() {
       <div className="relative" style={{ height: 180, background: '#2A1810', overflow: 'hidden' }}>
         {business.cover_url ? (
           <img
-            src={business.cover_url}
+            src={imgPresets.cover(business.cover_url) ?? business.cover_url}
             alt={business.name}
             className="h-full w-full object-cover"
             style={{ opacity: 0.65 }}
@@ -651,7 +652,7 @@ export function MenuPage() {
             style={{ background: 'var(--brand-color)', borderColor: 'rgba(255,255,255,0.3)' }}
           >
             {business.logo_url ? (
-              <img src={business.logo_url} alt={business.name} className="h-full w-full object-cover" />
+              <img src={imgPresets.logo(business.logo_url) ?? business.logo_url} alt={business.name} className="h-full w-full object-cover" />
             ) : (
               <span>{business.name.slice(0, 2).toUpperCase()}</span>
             )}

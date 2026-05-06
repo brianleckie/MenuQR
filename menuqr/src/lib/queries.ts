@@ -251,6 +251,50 @@ export function useToggleItemAvailability() {
   })
 }
 
+// ── Reorder ───────────────────────────────────────────────────────────────────
+
+export function useReorderCategories() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async ({
+      updates,
+    }: {
+      updates: { id: string; sort_order: number }[]
+      businessId: string
+    }) => {
+      if (!supabase) throw new Error('Supabase not configured')
+      const { error } = await supabase
+        .from('categories')
+        .upsert(updates.map(u => ({ id: u.id, sort_order: u.sort_order })))
+      if (error) throw error
+    },
+    onSuccess: (_data, variables) => {
+      qc.invalidateQueries({ queryKey: qk.categories(variables.businessId) })
+    },
+  })
+}
+
+export function useReorderItems() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async ({
+      updates,
+    }: {
+      updates: { id: string; sort_order: number }[]
+      businessId: string
+    }) => {
+      if (!supabase) throw new Error('Supabase not configured')
+      const { error } = await supabase
+        .from('items')
+        .upsert(updates.map(u => ({ id: u.id, sort_order: u.sort_order })))
+      if (error) throw error
+    },
+    onSuccess: (_data, variables) => {
+      qc.invalidateQueries({ queryKey: qk.items(variables.businessId) })
+    },
+  })
+}
+
 // ── Public menu (denormalizado) ───────────────────────────────────────────────
 
 export function useMenuData(slug: string) {
