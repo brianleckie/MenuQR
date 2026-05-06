@@ -5,7 +5,7 @@ import { MOCK_MENU_DATA, formatPrice } from '../../lib/mock-data'
 import type { Item, MenuData } from '../../types'
 import { useCart } from '../../contexts/CartContext'
 import { MenuQRLogo } from '../../components/ui/MenuQRLogo'
-import { imgPresets } from '../../lib/cloudinary'
+import { imgPresets, dishCardWithGravity, dishModalWithGravity } from '../../lib/cloudinary'
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 
@@ -138,7 +138,7 @@ function DishCard({ dish, cartQuantity, onAdd, onIncrement, onDecrement, onClick
       <div className="relative overflow-hidden bg-stone-100" style={{ paddingBottom: '66.67%' }}>
         {!imgErr && dish.image_url ? (
           <img
-            src={imgPresets.dishCard(dish.image_url) ?? dish.image_url}
+            src={dishCardWithGravity(dish.image_url, dish.image_gravity) ?? dish.image_url}
             alt={dish.name}
             onError={() => setImgErr(true)}
             className="absolute inset-0 h-full w-full object-cover"
@@ -261,7 +261,7 @@ function DishModal({ dish, whatsapp, cartQuantity, onAdd, onIncrement, onDecreme
         <div className="relative mx-4 overflow-hidden rounded-2xl bg-stone-100" style={{ paddingBottom: '56%' }}>
           {!imgErr && dish.image_url ? (
             <img
-              src={imgPresets.dishModal(dish.image_url) ?? dish.image_url}
+              src={dishModalWithGravity(dish.image_url, dish.image_gravity) ?? dish.image_url}
               alt={dish.name}
               onError={() => setImgErr(true)}
               className="absolute inset-0 h-full w-full object-cover"

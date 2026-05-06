@@ -33,7 +33,7 @@ export const MOCK_ITEMS: Item[] = [
     short_desc: 'Masa casera, carne con cebolla y huevo duro',
     description: 'Masa artesanal horneada al momento, rellena con carne picada especiada, cebolla, morrón verde y huevo duro. Se sirven de a tres unidades, con chimichurri de la casa.',
     image_url: 'https://images.unsplash.com/photo-1604467794349-0b74285de7e7?w=600&q=80',
-    created_at: NOW, updated_at: NOW,
+    image_gravity: null, created_at: NOW, updated_at: NOW,
   },
   {
     id: 'item-2', business_id: 'biz-la-estancia-1', category_id: 'entradas',
@@ -41,7 +41,7 @@ export const MOCK_ITEMS: Item[] = [
     short_desc: 'El clásico de clásicos. Maíz, queso Paraguay, cebolla',
     description: 'Nuestra versión de la sopa paraguaya tradicional: harina de maíz, queso Paraguay derretido, cebolla tierna y leche fresca. Horneada diariamente, servida tibia.',
     image_url: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&q=80',
-    created_at: NOW, updated_at: NOW,
+    image_gravity: null, created_at: NOW, updated_at: NOW,
   },
   {
     id: 'item-3', business_id: 'biz-la-estancia-1', category_id: 'entradas',
@@ -49,7 +49,7 @@ export const MOCK_ITEMS: Item[] = [
     short_desc: 'Con mojo de ajo y perejil fresco',
     description: 'Mandioca fresca seleccionada, hervida y frita hasta dorar. Se sirve con mojo de ajo, limón y perejil. El acompañamiento perfecto para comenzar.',
     image_url: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=600&q=80',
-    created_at: NOW, updated_at: NOW,
+    image_gravity: null, created_at: NOW, updated_at: NOW,
   },
   {
     id: 'item-4', business_id: 'biz-la-estancia-1', category_id: 'entradas',
@@ -57,7 +57,7 @@ export const MOCK_ITEMS: Item[] = [
     short_desc: 'Jamón crudo, salame, queso Paraguay, aceitunas',
     description: 'Selección de fiambres y quesos locales: jamón serrano, salame artesanal, queso Paraguay curado y aceitunas marinadas. Para compartir entre dos.',
     image_url: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=600&q=80',
-    created_at: NOW, updated_at: NOW,
+    image_gravity: null, created_at: NOW, updated_at: NOW,
   },
 
   // Platos Principales
@@ -67,7 +67,7 @@ export const MOCK_ITEMS: Item[] = [
     short_desc: '500g de costilla a las brasas, mandioca y ensalada',
     description: 'Costilla de novillo a las brasas durante tres horas, con sal parrillera y limón. Se sirve con mandioca hervida, ensalada criolla y chimichurri de la casa. El plato insignia de La Estancia.',
     image_url: 'https://images.unsplash.com/photo-1558030006-450675393462?w=600&q=80',
-    created_at: NOW, updated_at: NOW,
+    image_gravity: null, created_at: NOW, updated_at: NOW,
   },
   {
     id: 'item-6', business_id: 'biz-la-estancia-1', category_id: 'principales',
@@ -75,7 +75,7 @@ export const MOCK_ITEMS: Item[] = [
     short_desc: 'Lomo fino apanado, papas fritas y huevo frito',
     description: 'Filete de lomo fino apanado con pan rallado artesanal y huevo batido. Servida con papas fritas caseras y huevo frito a punto. Una milanesa que se corta con el tenedor.',
     image_url: 'https://images.unsplash.com/photo-1585325701956-60dd9c8553bc?w=600&q=80',
-    created_at: NOW, updated_at: NOW,
+    image_gravity: null, created_at: NOW, updated_at: NOW,
   },
   {
     id: 'item-7', business_id: 'biz-la-estancia-1', category_id: 'principales',
@@ -83,7 +83,7 @@ export const MOCK_ITEMS: Item[] = [
     short_desc: '350g al punto, con manteca de hierbas',
     description: 'Bife de chorizo de novillo, madurado 21 días, sellado a fuego alto y terminado con manteca de hierbas aromáticas. Se sirve con puré rústico de mandioca.',
     image_url: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&q=80',
-    created_at: NOW, updated_at: NOW,
+    image_gravity: null, created_at: NOW, updated_at: NOW,
   },
   {
     id: 'item-8', business_id: 'biz-la-estancia-1', category_id: 'principales',
@@ -91,7 +91,7 @@ export const MOCK_ITEMS: Item[] = [
     short_desc: 'Pechuga grillada, arroz y vegetales salteados',
     description: 'Pechuga de pollo marinada en limón, ajo y hierbas, grillada al punto justo. Acompañada con arroz blanco y vegetales de temporada salteados en aceite de oliva.',
     image_url: 'https://images.unsplash.com/photo-1598103442097-8b74394b95c3?w=600&q=80',
-    created_at: NOW, updated_at: NOW,
+    image_gravity: null, created_at: NOW, updated_at: NOW,
   },
 
   // Postres
@@ -101,7 +101,7 @@ export const MOCK_ITEMS: Item[] = [
     short_desc: 'Bizcochuelo húmedo, dulce de leche artesanal',
     description: 'Tres capas de bizcochuelo húmedo con dulce de leche artesanal entre cada capa y crema chantilly. Hecho en casa cada mañana. Un pedazo nunca es suficiente.',
     image_url: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&q=80',
-    created_at: NOW, updated_at: NOW,
+    image_gravity: null, created_at: NOW, updated_at: NOW,
   },
   {
     id: 'item-10', business_id: 'biz-la-estancia-1', category_id: 'postres',
@@ -109,7 +109,7 @@ export const MOCK_ITEMS: Item[] = [
     short_desc: '2 bochas: dulce de leche, frutilla o chocolate',
     description: 'Helado elaborado con leche de tambo local. Sabores del día: dulce de leche granizado, frutilla con semillas y chocolate amargo. Servido en copa con crema y wafer.',
     image_url: 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=600&q=80',
-    created_at: NOW, updated_at: NOW,
+    image_gravity: null, created_at: NOW, updated_at: NOW,
   },
   {
     id: 'item-11', business_id: 'biz-la-estancia-1', category_id: 'postres',
@@ -117,7 +117,7 @@ export const MOCK_ITEMS: Item[] = [
     short_desc: 'Versión postre del clásico paraguayo',
     description: 'Interpretación dulce de la chipa guazú tradicional: choclo tierno, leche, queso y miel de caña. Servida tibia con helado de crema.',
     image_url: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=600&q=80',
-    created_at: NOW, updated_at: NOW,
+    image_gravity: null, created_at: NOW, updated_at: NOW,
   },
 
   // Bebidas
@@ -127,7 +127,7 @@ export const MOCK_ITEMS: Item[] = [
     short_desc: 'Con menta, burrito y limón. Jarra 1L',
     description: 'Tereré preparado con yerba seleccionada, menta fresca, burrito, limón y hielo. Servido en jarra de 1 litro para la mesa. El ritual paraguayo en su máxima expresión.',
     image_url: 'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=600&q=80',
-    created_at: NOW, updated_at: NOW,
+    image_gravity: null, created_at: NOW, updated_at: NOW,
   },
   {
     id: 'item-13', business_id: 'biz-la-estancia-1', category_id: 'bebidas',
@@ -135,7 +135,7 @@ export const MOCK_ITEMS: Item[] = [
     short_desc: 'Limones frescos, jengibre y miel. Sin gas',
     description: 'Jugo de limón recién exprimido con jengibre fresco, miel de abeja y agua sin gas. Refrescante y energizante. El mejor maridaje para el asado.',
     image_url: 'https://images.unsplash.com/photo-1621263764928-df1444c5e859?w=600&q=80',
-    created_at: NOW, updated_at: NOW,
+    image_gravity: null, created_at: NOW, updated_at: NOW,
   },
   {
     id: 'item-14', business_id: 'biz-la-estancia-1', category_id: 'bebidas',
@@ -143,7 +143,7 @@ export const MOCK_ITEMS: Item[] = [
     short_desc: 'Rubia o negra, 500ml. Elaboración local',
     description: 'Cerveza artesanal de producción local. Rubia estilo lager, suave y refrescante; o negra estilo stout con notas de café y chocolate. Presentación en botella de 500ml.',
     image_url: 'https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=600&q=80',
-    created_at: NOW, updated_at: NOW,
+    image_gravity: null, created_at: NOW, updated_at: NOW,
   },
 ]
 
