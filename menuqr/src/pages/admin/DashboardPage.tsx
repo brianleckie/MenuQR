@@ -141,7 +141,7 @@ export function DashboardPage() {
       {/* QR Panel */}
       <div className="mb-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-stone-100">
         <h3 className="mb-4 text-sm font-bold text-stone-800">Tu código QR</h3>
-        <div className="flex flex-wrap items-center gap-6">
+        <div className="flex flex-col items-start gap-5 md:flex-row md:items-center md:gap-6">
           <div className="rounded-xl border-2 border-stone-100 p-3">
             <FakeQR size={130} />
           </div>

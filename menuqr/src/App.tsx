@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider } from './contexts/AuthContext'
+import { CartProvider } from './contexts/CartContext'
 import { ProtectedRoute } from './routes/ProtectedRoute'
 import { LoginPage } from './pages/admin/LoginPage'
 import { AdminLayout } from './pages/admin/AdminLayout'
@@ -24,7 +25,14 @@ export default function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Navigate to="/admin" replace />} />
-            <Route path="/menu/:slug" element={<MenuPage />} />
+            <Route
+              path="/menu/:slug"
+              element={
+                <CartProvider>
+                  <MenuPage />
+                </CartProvider>
+              }
+            />
             <Route path="/admin/login" element={<LoginPage />} />
             <Route element={<ProtectedRoute />}>
               <Route path="/admin" element={<AdminLayout />}>

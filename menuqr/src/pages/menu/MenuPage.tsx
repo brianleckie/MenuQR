@@ -3,6 +3,8 @@ import { useEffect, useState, useRef } from 'react'
 import { useMenuData } from '../../lib/queries'
 import { MOCK_MENU_DATA, formatPrice } from '../../lib/mock-data'
 import type { Item, MenuData } from '../../types'
+import { useCart } from '../../contexts/CartContext'
+import { MenuQRLogo } from '../../components/ui/MenuQRLogo'
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 
@@ -24,14 +26,102 @@ function WhatsAppIcon({ size = 18 }: { size?: number }) {
   )
 }
 
-// ── Dish Card ─────────────────────────────────────────────────────────────────
+function CartIcon({ size = 22 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="9" cy="21" r="1" />
+      <circle cx="20" cy="21" r="1" />
+      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+    </svg>
+  )
+}
+
+function PlusIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+      <line x1="12" y1="5" x2="12" y2="19" />
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  )
+}
+
+function MinusIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  )
+}
+
+function XIcon({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  )
+}
+
+function CheckIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  )
+}
+
+// ── ItemCounter ───────────────────────────────────────────────────────────────
+
+interface ItemCounterProps {
+  quantity: number
+  onIncrement: () => void
+  onDecrement: () => void
+  small?: boolean
+}
+
+function ItemCounter({ quantity, onIncrement, onDecrement, small = false }: ItemCounterProps) {
+  const size = small ? 'h-7 w-7 text-xs' : 'h-9 w-9 text-sm'
+  const textSize = small ? 'w-5 text-xs' : 'w-7 text-sm'
+  return (
+    <div
+      className="flex items-center gap-1 rounded-full border"
+      style={{ borderColor: 'var(--brand-color)', background: 'white' }}
+    >
+      <button
+        onClick={(e) => { e.stopPropagation(); onDecrement() }}
+        className={`flex flex-shrink-0 items-center justify-center rounded-full font-bold transition hover:opacity-75 ${size}`}
+        style={{ color: 'var(--brand-color)' }}
+        aria-label="Quitar"
+      >
+        <MinusIcon />
+      </button>
+      <span className={`text-center font-bold ${textSize}`} style={{ color: 'var(--brand-color)' }}>
+        {quantity}
+      </span>
+      <button
+        onClick={(e) => { e.stopPropagation(); onIncrement() }}
+        className={`flex flex-shrink-0 items-center justify-center rounded-full font-bold transition hover:opacity-75 ${size}`}
+        style={{ color: 'var(--brand-color)' }}
+        aria-label="Agregar"
+      >
+        <PlusIcon />
+      </button>
+    </div>
+  )
+}
+
+// ── DishCard ──────────────────────────────────────────────────────────────────
 
 interface DishCardProps {
   dish: Item
+  cartQuantity: number
+  onAdd: () => void
+  onIncrement: () => void
+  onDecrement: () => void
   onClick: (dish: Item) => void
 }
 
-function DishCard({ dish, onClick }: DishCardProps) {
+function DishCard({ dish, cartQuantity, onAdd, onIncrement, onDecrement, onClick }: DishCardProps) {
   const [imgErr, setImgErr] = useState(false)
 
   return (
@@ -44,10 +134,7 @@ function DishCard({ dish, onClick }: DishCardProps) {
       }}
     >
       {/* Photo */}
-      <div
-        className="relative overflow-hidden bg-stone-100"
-        style={{ paddingBottom: '66.67%' }}
-      >
+      <div className="relative overflow-hidden bg-stone-100" style={{ paddingBottom: '66.67%' }}>
         {!imgErr && dish.image_url ? (
           <img
             src={dish.image_url}
@@ -91,29 +178,56 @@ function DishCard({ dish, onClick }: DishCardProps) {
             {dish.short_desc}
           </p>
         )}
-        <p
-          className="text-sm font-bold"
-          style={{
-            color: dish.available ? 'var(--brand-color)' : '#9E9E9E',
-            textDecoration: dish.available ? 'none' : 'line-through',
-          }}
-        >
-          {formatPrice(dish.price)}
-        </p>
+
+        <div className="flex items-center justify-between gap-1">
+          <p
+            className="text-sm font-bold"
+            style={{
+              color: dish.available ? 'var(--brand-color)' : '#9E9E9E',
+              textDecoration: dish.available ? 'none' : 'line-through',
+            }}
+          >
+            {formatPrice(dish.price)}
+          </p>
+
+          {dish.available && (
+            cartQuantity === 0 ? (
+              <button
+                onClick={(e) => { e.stopPropagation(); onAdd() }}
+                className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-white transition hover:opacity-80"
+                style={{ background: 'var(--brand-color)' }}
+                aria-label={`Agregar ${dish.name}`}
+              >
+                <PlusIcon />
+              </button>
+            ) : (
+              <ItemCounter
+                quantity={cartQuantity}
+                onIncrement={onIncrement}
+                onDecrement={onDecrement}
+                small
+              />
+            )
+          )}
+        </div>
       </div>
     </div>
   )
 }
 
-// ── Dish Modal ────────────────────────────────────────────────────────────────
+// ── DishModal ─────────────────────────────────────────────────────────────────
 
 interface DishModalProps {
   dish: Item
   whatsapp: string | null
+  cartQuantity: number
+  onAdd: () => void
+  onIncrement: () => void
+  onDecrement: () => void
   onClose: () => void
 }
 
-function DishModal({ dish, whatsapp, onClose }: DishModalProps) {
+function DishModal({ dish, whatsapp, cartQuantity, onAdd, onIncrement, onDecrement, onClose }: DishModalProps) {
   const [imgErr, setImgErr] = useState(false)
 
   useEffect(() => {
@@ -121,6 +235,10 @@ function DishModal({ dish, whatsapp, onClose }: DishModalProps) {
     document.addEventListener('keydown', handler)
     return () => document.removeEventListener('keydown', handler)
   }, [onClose])
+
+  const waUrl = whatsapp
+    ? `https://wa.me/${whatsapp}?text=${encodeURIComponent(`Hola! Quiero pedir: ${dish.name}`)}`
+    : null
 
   return (
     <div
@@ -139,10 +257,7 @@ function DishModal({ dish, whatsapp, onClose }: DishModalProps) {
         </div>
 
         {/* Photo */}
-        <div
-          className="relative mx-4 overflow-hidden rounded-2xl bg-stone-100"
-          style={{ paddingBottom: '56%' }}
-        >
+        <div className="relative mx-4 overflow-hidden rounded-2xl bg-stone-100" style={{ paddingBottom: '56%' }}>
           {!imgErr && dish.image_url ? (
             <img
               src={dish.image_url}
@@ -165,12 +280,12 @@ function DishModal({ dish, whatsapp, onClose }: DishModalProps) {
             className="absolute right-2.5 top-2.5 flex h-9 w-9 items-center justify-center rounded-full text-white"
             style={{ background: 'rgba(28,20,16,0.5)', backdropFilter: 'blur(8px)' }}
           >
-            ✕
+            <XIcon size={16} />
           </button>
         </div>
 
         {/* Content */}
-        <div className="px-5 pb-10 pt-5">
+        <div className="px-5 pb-8 pt-5">
           <div className="mb-3 flex items-start justify-between gap-3">
             <h2 className="flex-1 font-serif text-xl font-bold leading-snug text-stone-800">
               {dish.name}
@@ -192,16 +307,43 @@ function DishModal({ dish, whatsapp, onClose }: DishModalProps) {
             </p>
           )}
 
-          {dish.available && whatsapp && (
-            <a
-              href={`https://wa.me/${whatsapp}?text=Hola! Quiero pedir: ${encodeURIComponent(dish.name)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-6 flex items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-bold text-white no-underline"
-              style={{ background: 'var(--brand-color)' }}
-            >
-              <WhatsAppIcon size={16} /> Pedir por WhatsApp
-            </a>
+          {dish.available && (
+            <div className="mt-6 space-y-3">
+              {cartQuantity === 0 ? (
+                <button
+                  onClick={onAdd}
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-bold text-white"
+                  style={{ background: 'var(--brand-color)' }}
+                >
+                  <PlusIcon /> Agregar al carrito
+                </button>
+              ) : (
+                <div className="flex items-center justify-between rounded-2xl border px-5 py-3" style={{ borderColor: 'var(--brand-color)' }}>
+                  <span className="text-sm font-semibold" style={{ color: 'var(--brand-color)' }}>
+                    En tu carrito
+                  </span>
+                  <ItemCounter
+                    quantity={cartQuantity}
+                    onIncrement={onIncrement}
+                    onDecrement={onDecrement}
+                  />
+                </div>
+              )}
+
+              {waUrl && (
+                <div className="flex justify-center">
+                  <a
+                    href={waUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 text-xs text-stone-400 no-underline transition hover:text-stone-600"
+                  >
+                    <WhatsAppIcon size={12} />
+                    ¿Preferís pedir directo? WhatsApp →
+                  </a>
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>
@@ -209,7 +351,209 @@ function DishModal({ dish, whatsapp, onClose }: DishModalProps) {
   )
 }
 
-// ── Public Menu ───────────────────────────────────────────────────────────────
+// ── CartSheet ─────────────────────────────────────────────────────────────────
+
+interface CartSheetProps {
+  whatsapp: string | null
+  businessName: string
+  onClose: () => void
+}
+
+function CartSheet({ whatsapp, businessName, onClose }: CartSheetProps) {
+  const { items, increment, decrement, total, count } = useCart()
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [onClose])
+
+  function buildWhatsAppUrl() {
+    const lines = [
+      `Hola! Quiero hacer el siguiente pedido en ${businessName}:`,
+      ...items.map(
+        item =>
+          `• ${item.quantity}x ${item.name} — Gs. ${(item.price * item.quantity).toLocaleString('es-PY')}`
+      ),
+      '',
+      `*Total: Gs. ${total.toLocaleString('es-PY')}*`,
+    ]
+    return `https://wa.me/${whatsapp}?text=${encodeURIComponent(lines.join('\n'))}`
+  }
+
+  return (
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-end"
+      style={{ background: 'rgba(28,20,16,0.55)', backdropFilter: 'blur(4px)' }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="animate-slide-up w-full rounded-t-3xl bg-white"
+        style={{ maxHeight: '85vh', display: 'flex', flexDirection: 'column' }}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-stone-100 px-5 py-4">
+          <h2 className="font-serif text-lg font-bold text-stone-800">Tu pedido</h2>
+          <button
+            onClick={onClose}
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-stone-100 text-stone-500 transition hover:bg-stone-200"
+          >
+            <XIcon size={15} />
+          </button>
+        </div>
+
+        {/* Items */}
+        <div className="flex-1 overflow-y-auto px-5 py-3">
+          {count === 0 ? (
+            <p className="py-8 text-center text-sm text-stone-400">Tu carrito está vacío</p>
+          ) : (
+            <div className="space-y-3">
+              {items.map(item => (
+                <div key={item.id} className="flex items-center gap-3">
+                  <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-xl bg-stone-100">
+                    {item.image_url && (
+                      <img src={item.image_url} alt={item.name} className="h-full w-full object-cover" />
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-stone-800">{item.name}</p>
+                    <p className="text-xs font-bold" style={{ color: 'var(--brand-color)' }}>
+                      Gs. {(item.price * item.quantity).toLocaleString('es-PY')}
+                    </p>
+                  </div>
+                  <ItemCounter
+                    quantity={item.quantity}
+                    onIncrement={() => increment(item.id)}
+                    onDecrement={() => decrement(item.id)}
+                    small
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="border-t border-stone-100 px-5 pb-6 pt-4" style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom, 1.5rem))' }}>
+          <div className="mb-4 flex items-center justify-between">
+            <span className="text-sm font-semibold text-stone-600">Total</span>
+            <span className="text-lg font-extrabold text-stone-800">
+              Gs. {total.toLocaleString('es-PY')}
+            </span>
+          </div>
+
+          {whatsapp && count > 0 && (
+            <a
+              href={buildWhatsAppUrl()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mb-2 flex items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-bold text-white no-underline"
+              style={{ background: '#25D366' }}
+            >
+              <WhatsAppIcon size={16} /> Pedir por WhatsApp
+            </a>
+          )}
+          <button
+            onClick={onClose}
+            className="w-full rounded-2xl border border-stone-200 py-3 text-sm font-semibold text-stone-600 transition hover:bg-stone-50"
+          >
+            Seguir viendo el menú
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── MenuQRPromoSheet ──────────────────────────────────────────────────────────
+
+interface MenuQRPromoSheetProps {
+  restaurantName: string
+  onClose: () => void
+}
+
+function MenuQRPromoSheet({ restaurantName, onClose }: MenuQRPromoSheetProps) {
+  const contactWhatsapp =
+    import.meta.env.VITE_CONTACT_WHATSAPP ?? '595991234567'
+
+  const message = `Hola! Vi el menú de ${restaurantName} y me interesa tener un menú digital para mi negocio. ¿Pueden darme más info?`
+  const contactUrl = `https://wa.me/${contactWhatsapp}?text=${encodeURIComponent(message)}`
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [onClose])
+
+  const perks = [
+    'Menú siempre actualizado',
+    'Carrito y pedidos por WhatsApp',
+    'Tu logo y colores propios',
+    'QR descargable para mesas',
+    'Sin app, sin comisiones',
+  ]
+
+  return (
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-end"
+      style={{ background: 'rgba(28,20,16,0.45)', backdropFilter: 'blur(4px)' }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="animate-slide-up w-full rounded-t-3xl bg-white px-6 pb-8 pt-5"
+        style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom, 2rem))' }}
+      >
+        {/* Handle */}
+        <div className="mb-4 flex justify-center">
+          <div className="h-1 w-9 rounded-full bg-stone-200" />
+        </div>
+
+        {/* Header */}
+        <div className="mb-5 flex items-start justify-between">
+          <div>
+            <MenuQRLogo size={28} showText className="mb-1 text-stone-800" />
+            <h2 className="font-serif text-xl font-bold text-stone-800">
+              Menú digital con QR<br />para tu restaurante
+            </h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-stone-100 text-stone-500 transition hover:bg-stone-200"
+          >
+            <XIcon size={15} />
+          </button>
+        </div>
+
+        {/* Perks */}
+        <ul className="mb-6 space-y-2.5">
+          {perks.map(perk => (
+            <li key={perk} className="flex items-center gap-2.5 text-sm text-stone-700">
+              <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-green-100 text-green-600">
+                <CheckIcon />
+              </span>
+              {perk}
+            </li>
+          ))}
+        </ul>
+
+        {/* CTA */}
+        <a
+          href={contactUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-bold text-white no-underline"
+          style={{ background: '#25D366' }}
+        >
+          <WhatsAppIcon size={16} /> Quiero mi menú digital
+        </a>
+      </div>
+    </div>
+  )
+}
+
+// ── Public MenuPage ───────────────────────────────────────────────────────────
 
 export function MenuPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -223,7 +567,11 @@ export function MenuPage() {
 
   const [activeCategory, setActiveCategory] = useState<string>('')
   const [selectedDish, setSelectedDish] = useState<Item | null>(null)
+  const [cartOpen, setCartOpen] = useState(false)
+  const [promoOpen, setPromoOpen] = useState(false)
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({})
+
+  const { add, increment, decrement, items: cartItems, count, total } = useCart()
 
   useEffect(() => {
     if (data?.business.primary_color) {
@@ -243,9 +591,11 @@ export function MenuPage() {
   const scrollToCategory = (id: string) => {
     setActiveCategory(id)
     const el = sectionRefs.current[id]
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
+  function getCartQuantity(dishId: string) {
+    return cartItems.find(i => i.id === dishId)?.quantity ?? 0
   }
 
   if (isLoading) {
@@ -261,9 +611,7 @@ export function MenuPage() {
       <div className="flex min-h-screen flex-col items-center justify-center bg-stone-50 px-4 text-center">
         <p className="text-5xl">🍽️</p>
         <h1 className="mt-4 font-serif text-xl font-bold text-stone-700">Menú no encontrado</h1>
-        <p className="mt-2 text-sm text-stone-400">
-          Este restaurante no existe o fue removido.
-        </p>
+        <p className="mt-2 text-sm text-stone-400">Este restaurante no existe o fue removido.</p>
         <a
           href="/"
           className="mt-6 rounded-xl px-5 py-2.5 text-sm font-bold text-white"
@@ -279,6 +627,16 @@ export function MenuPage() {
 
   return (
     <div className="min-h-screen bg-stone-50 font-sans">
+      {/* MenuQR promo button — top right */}
+      <button
+        onClick={() => setPromoOpen(true)}
+        className="fixed right-4 top-4 z-40 flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 shadow-md transition hover:shadow-lg"
+        style={{ color: '#1C1410' }}
+      >
+        <MenuQRLogo size={16} showText={false} />
+        <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '-0.01em' }}>MenuQR ✨</span>
+      </button>
+
       {/* Cover */}
       <div className="relative" style={{ height: 180, background: '#2A1810', overflow: 'hidden' }}>
         {business.cover_url ? (
@@ -303,19 +661,13 @@ export function MenuPage() {
             style={{ background: 'var(--brand-color)', borderColor: 'rgba(255,255,255,0.3)' }}
           >
             {business.logo_url ? (
-              <img
-                src={business.logo_url}
-                alt={business.name}
-                className="h-full w-full object-cover"
-              />
+              <img src={business.logo_url} alt={business.name} className="h-full w-full object-cover" />
             ) : (
               <span>{business.name.slice(0, 2).toUpperCase()}</span>
             )}
           </div>
           <div>
-            <h1 className="font-serif text-xl font-bold leading-tight text-white">
-              {business.name}
-            </h1>
+            <h1 className="font-serif text-xl font-bold leading-tight text-white">{business.name}</h1>
             {business.tagline && (
               <p className="text-xs italic text-white/75">{business.tagline}</p>
             )}
@@ -366,7 +718,7 @@ export function MenuPage() {
       </div>
 
       {/* Category sections */}
-      <div className="px-4 pb-16 pt-2">
+      <div className="px-4 pb-32 pt-2">
         {categories.map((cat) => (
           <div
             key={cat.id}
@@ -379,33 +731,76 @@ export function MenuPage() {
             </h2>
             <div className="grid grid-cols-2 gap-3">
               {cat.items.map((dish) => (
-                <DishCard key={dish.id} dish={dish} onClick={setSelectedDish} />
+                <DishCard
+                  key={dish.id}
+                  dish={dish}
+                  cartQuantity={getCartQuantity(dish.id)}
+                  onAdd={() => add({ id: dish.id, name: dish.name, price: dish.price, image_url: dish.image_url })}
+                  onIncrement={() => increment(dish.id)}
+                  onDecrement={() => decrement(dish.id)}
+                  onClick={setSelectedDish}
+                />
               ))}
             </div>
           </div>
         ))}
       </div>
 
-      {/* WhatsApp FAB */}
-      {business.whatsapp && (
-        <a
-          href={`https://wa.me/${business.whatsapp}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="fixed bottom-5 right-5 flex h-14 w-14 items-center justify-center rounded-full text-white shadow-lg transition hover:scale-105"
-          style={{ background: '#25D366' }}
-          aria-label="Contactar por WhatsApp"
+      {/* FAB: cart when items > 0, WhatsApp otherwise */}
+      {count > 0 ? (
+        <button
+          onClick={() => setCartOpen(true)}
+          className="fixed bottom-5 left-4 right-4 z-30 flex items-center justify-between rounded-2xl px-5 py-3.5 text-white shadow-xl transition hover:opacity-95"
+          style={{ background: 'var(--brand-color)' }}
         >
-          <WhatsAppIcon size={26} />
-        </a>
+          <div className="flex items-center gap-2 font-bold">
+            <CartIcon size={20} />
+            <span>Ver pedido · {count} item{count !== 1 ? 's' : ''}</span>
+          </div>
+          <span className="font-bold">Gs. {total.toLocaleString('es-PY')}</span>
+        </button>
+      ) : (
+        business.whatsapp && (
+          <a
+            href={`https://wa.me/${business.whatsapp}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="fixed bottom-5 right-5 z-30 flex h-14 w-14 items-center justify-center rounded-full text-white shadow-lg transition hover:scale-105"
+            style={{ background: '#25D366' }}
+            aria-label="Contactar por WhatsApp"
+          >
+            <WhatsAppIcon size={26} />
+          </a>
+        )
       )}
 
-      {/* Dish Modal */}
+      {/* Dish modal */}
       {selectedDish && (
         <DishModal
           dish={selectedDish}
           whatsapp={business.whatsapp}
+          cartQuantity={getCartQuantity(selectedDish.id)}
+          onAdd={() => add({ id: selectedDish.id, name: selectedDish.name, price: selectedDish.price, image_url: selectedDish.image_url })}
+          onIncrement={() => increment(selectedDish.id)}
+          onDecrement={() => decrement(selectedDish.id)}
           onClose={() => setSelectedDish(null)}
+        />
+      )}
+
+      {/* Cart sheet */}
+      {cartOpen && (
+        <CartSheet
+          whatsapp={business.whatsapp}
+          businessName={business.name}
+          onClose={() => setCartOpen(false)}
+        />
+      )}
+
+      {/* MenuQR promo sheet */}
+      {promoOpen && (
+        <MenuQRPromoSheet
+          restaurantName={business.name}
+          onClose={() => setPromoOpen(false)}
         />
       )}
     </div>
