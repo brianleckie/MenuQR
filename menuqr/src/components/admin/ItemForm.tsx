@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type { Category, Item } from '../../types'
 import { useUpsertItem } from '../../lib/queries'
 import { ImageUpload } from './ImageUpload'
+import { dishCardWithGravity } from '../../lib/cloudinary'
 
 interface ItemFormProps {
   item: Item | null
@@ -15,6 +16,29 @@ const inputClass =
 const labelClass =
   'mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500'
 
+type ImageGravity =
+  | 'north_west' | 'north' | 'north_east'
+  | 'west'       | 'center' | 'east'
+  | 'south_west' | 'south' | 'south_east'
+
+const GRAVITY_GRID: { value: ImageGravity; label: string }[][] = [
+  [
+    { value: 'north_west', label: '↖' },
+    { value: 'north',      label: '↑' },
+    { value: 'north_east', label: '↗' },
+  ],
+  [
+    { value: 'west',   label: '←' },
+    { value: 'center', label: '·' },
+    { value: 'east',   label: '→' },
+  ],
+  [
+    { value: 'south_west', label: '↙' },
+    { value: 'south',      label: '↓' },
+    { value: 'south_east', label: '↘' },
+  ],
+]
+
 interface FormState {
   name: string
   short_desc: string
@@ -23,6 +47,16 @@ interface FormState {
   category_id: string
   available: boolean
   image_url: string | null
+  image_gravity: ImageGravity
+}
+
+function gravityFromDb(g: string | null | undefined): ImageGravity {
+  const valid: ImageGravity[] = [
+    'north_west', 'north', 'north_east',
+    'west', 'center', 'east',
+    'south_west', 'south', 'south_east',
+  ]
+  return valid.includes(g as ImageGravity) ? (g as ImageGravity) : 'center'
 }
 
 function buildInitial(item: Item | null, categories: Category[]): FormState {
@@ -35,6 +69,7 @@ function buildInitial(item: Item | null, categories: Category[]): FormState {
       category_id: item.category_id,
       available: item.available,
       image_url: item.image_url,
+      image_gravity: gravityFromDb(item.image_gravity),
     }
   }
   return {
@@ -45,6 +80,7 @@ function buildInitial(item: Item | null, categories: Category[]): FormState {
     category_id: categories[0]?.id ?? '',
     available: true,
     image_url: null,
+    image_gravity: 'center',
   }
 }
 
@@ -78,11 +114,14 @@ export function ItemForm({ item, businessId, categories, onClose }: ItemFormProp
       description: form.description.trim() || null,
       price: Number(form.price),
       image_url: form.image_url,
+      image_gravity: form.image_gravity,
       available: form.available,
       sort_order: item?.sort_order ?? 0,
     }
     upsert.mutate(payload, { onSuccess: close })
   }
+
+  const previewSrc = dishCardWithGravity(form.image_url, form.image_gravity)
 
   return (
     <>
@@ -124,6 +163,57 @@ export function ItemForm({ item, businessId, categories, onClose }: ItemFormProp
                 onClear={() => set('image_url', null)}
               />
             </div>
+
+            {/* Gravity selector — solo visible cuando hay imagen */}
+            {form.image_url && (
+              <div>
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-stone-500">
+                  Ajustá el recorte
+                </p>
+                <div className="flex items-start gap-4">
+                  {/* 3×3 grid */}
+                  <div className="flex flex-col gap-1">
+                    {GRAVITY_GRID.map((row, ri) => (
+                      <div key={ri} className="flex gap-1">
+                        {row.map(btn => {
+                          const active = form.image_gravity === btn.value
+                          return (
+                            <button
+                              key={btn.value}
+                              type="button"
+                              onClick={() => set('image_gravity', btn.value)}
+                              title={
+                                btn.value === 'center'
+                                  ? 'Automático — Cloudinary detecta el punto de interés'
+                                  : btn.label
+                              }
+                              className="flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold transition"
+                              style={{
+                                background: active ? 'var(--brand-color)' : '#F5F0EA',
+                                color: active ? '#fff' : '#78716C',
+                              }}
+                            >
+                              {btn.label}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Live preview 3:2 */}
+                  <div className="relative flex-1 overflow-hidden rounded-xl bg-stone-100" style={{ paddingBottom: '66.67%' }}>
+                    {previewSrc && (
+                      <img
+                        src={previewSrc}
+                        alt="Preview del recorte"
+                        className="absolute inset-0 h-full w-full object-cover"
+                      />
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Nombre */}
             <div>

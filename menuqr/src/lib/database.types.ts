@@ -55,6 +55,7 @@ export type Database = {
           description: string | null
           price: number
           image_url: string | null
+          image_gravity: string | null
           available: boolean
           sort_order: number
           created_at: string

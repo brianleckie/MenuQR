@@ -1,3 +1,8 @@
+type GravityOption =
+  | 'auto' | 'face' | 'center'
+  | 'north' | 'south' | 'east' | 'west'
+  | 'north_east' | 'north_west' | 'south_east' | 'south_west'
+
 /**
  * Inserta transformaciones de Cloudinary en una URL existente.
  * Solo actúa sobre URLs de Cloudinary — devuelve la URL original intacta
@@ -9,7 +14,7 @@ export function optimizeImage(
     width?: number
     height?: number
     crop?: 'fill' | 'fit' | 'thumb'
-    gravity?: 'auto' | 'face' | 'center'
+    gravity?: GravityOption
   }
 ): string | null {
   if (!url || !url.includes('cloudinary.com')) return url
@@ -56,4 +61,30 @@ export const imgPresets = {
   /** Thumbnail en tabla admin — 92×68 */
   adminThumb: (url: string | null) =>
     optimizeImage(url, { width: 92, height: 68, crop: 'fill', gravity: 'auto' }),
+}
+
+/** Card de plato respetando el gravity configurado por el dueño */
+export function dishCardWithGravity(
+  url: string | null,
+  gravity: string | null | undefined
+): string | null {
+  return optimizeImage(url, {
+    width: 600,
+    height: 400,
+    crop: 'fill',
+    gravity: (gravity as GravityOption) ?? 'auto',
+  })
+}
+
+/** Modal de plato respetando el gravity configurado por el dueño */
+export function dishModalWithGravity(
+  url: string | null,
+  gravity: string | null | undefined
+): string | null {
+  return optimizeImage(url, {
+    width: 800,
+    height: 450,
+    crop: 'fill',
+    gravity: (gravity as GravityOption) ?? 'auto',
+  })
 }

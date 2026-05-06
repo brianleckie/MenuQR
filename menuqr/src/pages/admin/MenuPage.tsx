@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import {
@@ -100,12 +100,22 @@ export function MenuItemsPage() {
   const [activeCat, setActiveCat] = useState<string | null>(null)
   const [drawerItem, setDrawerItem] = useState<Item | null | undefined>(undefined)
   const [localItems, setLocalItems] = useState<Item[]>([])
+  const seeded = useRef(false)
 
   const cats = categories ?? []
   const currentCat = activeCat ?? cats[0]?.id ?? null
 
+  // Reset seed when category tab changes so we re-seed from server for the new category
   useEffect(() => {
-    setLocalItems((items ?? []).filter(d => d.category_id === currentCat))
+    seeded.current = false
+  }, [activeCat])
+
+  // Seed local state once per category from server; after that, local state owns the order
+  useEffect(() => {
+    if (!seeded.current && items !== undefined && currentCat !== null) {
+      setLocalItems(items.filter(d => d.category_id === currentCat))
+      seeded.current = true
+    }
   }, [items, currentCat])
 
   const sensors = useSensors(
@@ -134,6 +144,7 @@ export function MenuItemsPage() {
   function handleDelete(item: Item) {
     if (!business) return
     if (!window.confirm(`¿Eliminar "${item.name}"?`)) return
+    seeded.current = false
     deleteItem.mutate({ id: item.id, businessId: business.id })
   }
 
@@ -381,7 +392,10 @@ export function MenuItemsPage() {
           item={drawerItem}
           businessId={business.id}
           categories={cats}
-          onClose={() => setDrawerItem(undefined)}
+          onClose={() => {
+            seeded.current = false
+            setDrawerItem(undefined)
+          }}
         />
       )}
     </div>

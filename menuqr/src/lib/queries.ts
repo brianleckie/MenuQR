@@ -273,19 +273,19 @@ export function useReorderCategories() {
     },
     onMutate: async ({ updates, businessId }) => {
       await qc.cancelQueries({ queryKey: qk.categories(businessId) })
-      const prev = qc.getQueryData(qk.categories(businessId))
+      const prev = qc.getQueryData<Category[]>(qk.categories(businessId))
       const orderMap = new Map(updates.map(u => [u.id, u.sort_order]))
-      qc.setQueryData(qk.categories(businessId), (old: Category[] | undefined) =>
-        old
-          ? [...old]
-              .map(c => ({ ...c, sort_order: orderMap.get(c.id) ?? c.sort_order }))
-              .sort((a, b) => a.sort_order - b.sort_order)
-          : old
+      qc.setQueryData<Category[]>(qk.categories(businessId), old =>
+        old?.map(c => {
+          const newOrder = orderMap.get(c.id)
+          return newOrder !== undefined ? { ...c, sort_order: newOrder } : c
+        })
       )
       return { prev }
     },
-    onError: (_err, { businessId }, ctx) => {
-      qc.setQueryData(qk.categories(businessId), ctx?.prev)
+    onError: (err, { businessId }, ctx) => {
+      console.error('Reorder categories failed:', err)
+      if (ctx?.prev) qc.setQueryData(qk.categories(businessId), ctx.prev)
     },
   })
 }
@@ -310,19 +310,19 @@ export function useReorderItems() {
     },
     onMutate: async ({ updates, businessId }) => {
       await qc.cancelQueries({ queryKey: qk.items(businessId) })
-      const prev = qc.getQueryData(qk.items(businessId))
+      const prev = qc.getQueryData<Item[]>(qk.items(businessId))
       const orderMap = new Map(updates.map(u => [u.id, u.sort_order]))
-      qc.setQueryData(qk.items(businessId), (old: Item[] | undefined) =>
-        old
-          ? [...old]
-              .map(item => ({ ...item, sort_order: orderMap.get(item.id) ?? item.sort_order }))
-              .sort((a, b) => a.sort_order - b.sort_order)
-          : old
+      qc.setQueryData<Item[]>(qk.items(businessId), old =>
+        old?.map(item => {
+          const newOrder = orderMap.get(item.id)
+          return newOrder !== undefined ? { ...item, sort_order: newOrder } : item
+        })
       )
       return { prev }
     },
-    onError: (_err, { businessId }, ctx) => {
-      qc.setQueryData(qk.items(businessId), ctx?.prev)
+    onError: (err, { businessId }, ctx) => {
+      console.error('Reorder items failed:', err)
+      if (ctx?.prev) qc.setQueryData(qk.items(businessId), ctx.prev)
     },
   })
 }

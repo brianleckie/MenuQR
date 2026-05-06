@@ -38,6 +38,7 @@ export interface Item {
   description: string | null;  // full description shown in modal
   price: number;               // in local currency (Gs.)
   image_url: string | null;    // always Cloudinary URL
+  image_gravity: string | null;
   available: boolean;
   sort_order: number;
   created_at: string;

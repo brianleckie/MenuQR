@@ -44,9 +44,14 @@ export function CategoriesPage() {
   const [newName, setNewName] = useState('')
   const [localCategories, setLocalCategories] = useState<Category[]>([])
   const newInputRef = useRef<HTMLInputElement>(null)
+  const seeded = useRef(false)
 
+  // Seed local state once from server; after that, local state owns the order
   useEffect(() => {
-    setLocalCategories(categories ?? [])
+    if (!seeded.current && categories !== undefined) {
+      setLocalCategories(categories)
+      seeded.current = true
+    }
   }, [categories])
 
   const sensors = useSensors(
@@ -100,7 +105,7 @@ export function CategoriesPage() {
           name,
           sort_order: (localCategories.length + 1) * 10,
         },
-        { onSuccess: () => { setAddingNew(false); setNewName('') } }
+        { onSuccess: () => { seeded.current = false; setAddingNew(false); setNewName('') } }
       )
     } else {
       setAddingNew(false)
@@ -116,6 +121,7 @@ export function CategoriesPage() {
   function handleDelete(cat: Category) {
     if (!business) return
     if (!window.confirm(`¿Eliminar la categoría "${cat.name}"? Se borrarán todos sus platos.`)) return
+    seeded.current = false
     deleteCategory.mutate({ id: cat.id, businessId: business.id })
   }
 
