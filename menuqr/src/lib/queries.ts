@@ -268,6 +268,22 @@ export function useReorderCategories() {
         .upsert(updates.map(u => ({ id: u.id, sort_order: u.sort_order })))
       if (error) throw error
     },
+    onMutate: async ({ updates, businessId }) => {
+      await qc.cancelQueries({ queryKey: qk.categories(businessId) })
+      const prev = qc.getQueryData(qk.categories(businessId))
+      const orderMap = new Map(updates.map(u => [u.id, u.sort_order]))
+      qc.setQueryData(qk.categories(businessId), (old: Category[] | undefined) =>
+        old
+          ? [...old]
+              .map(c => ({ ...c, sort_order: orderMap.get(c.id) ?? c.sort_order }))
+              .sort((a, b) => a.sort_order - b.sort_order)
+          : old
+      )
+      return { prev }
+    },
+    onError: (_err, { businessId }, ctx) => {
+      qc.setQueryData(qk.categories(businessId), ctx?.prev)
+    },
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: qk.categories(variables.businessId) })
     },
@@ -288,6 +304,22 @@ export function useReorderItems() {
         .from('items')
         .upsert(updates.map(u => ({ id: u.id, sort_order: u.sort_order })))
       if (error) throw error
+    },
+    onMutate: async ({ updates, businessId }) => {
+      await qc.cancelQueries({ queryKey: qk.items(businessId) })
+      const prev = qc.getQueryData(qk.items(businessId))
+      const orderMap = new Map(updates.map(u => [u.id, u.sort_order]))
+      qc.setQueryData(qk.items(businessId), (old: Item[] | undefined) =>
+        old
+          ? [...old]
+              .map(item => ({ ...item, sort_order: orderMap.get(item.id) ?? item.sort_order }))
+              .sort((a, b) => a.sort_order - b.sort_order)
+          : old
+      )
+      return { prev }
+    },
+    onError: (_err, { businessId }, ctx) => {
+      qc.setQueryData(qk.items(businessId), ctx?.prev)
     },
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: qk.items(variables.businessId) })
