@@ -263,10 +263,13 @@ export function useReorderCategories() {
       businessId: string
     }) => {
       if (!supabase) throw new Error('Supabase not configured')
-      const { error } = await supabase
-        .from('categories')
-        .upsert(updates.map(u => ({ id: u.id, sort_order: u.sort_order })))
-      if (error) throw error
+      const results = await Promise.all(
+        updates.map(u =>
+          supabase!.from('categories').update({ sort_order: u.sort_order }).eq('id', u.id)
+        )
+      )
+      const failed = results.find(r => r.error)
+      if (failed?.error) throw failed.error
     },
     onMutate: async ({ updates, businessId }) => {
       await qc.cancelQueries({ queryKey: qk.categories(businessId) })
@@ -284,9 +287,6 @@ export function useReorderCategories() {
     onError: (_err, { businessId }, ctx) => {
       qc.setQueryData(qk.categories(businessId), ctx?.prev)
     },
-    onSuccess: (_data, variables) => {
-      qc.invalidateQueries({ queryKey: qk.categories(variables.businessId) })
-    },
   })
 }
 
@@ -300,10 +300,13 @@ export function useReorderItems() {
       businessId: string
     }) => {
       if (!supabase) throw new Error('Supabase not configured')
-      const { error } = await supabase
-        .from('items')
-        .upsert(updates.map(u => ({ id: u.id, sort_order: u.sort_order })))
-      if (error) throw error
+      const results = await Promise.all(
+        updates.map(u =>
+          supabase!.from('items').update({ sort_order: u.sort_order }).eq('id', u.id)
+        )
+      )
+      const failed = results.find(r => r.error)
+      if (failed?.error) throw failed.error
     },
     onMutate: async ({ updates, businessId }) => {
       await qc.cancelQueries({ queryKey: qk.items(businessId) })
@@ -320,9 +323,6 @@ export function useReorderItems() {
     },
     onError: (_err, { businessId }, ctx) => {
       qc.setQueryData(qk.items(businessId), ctx?.prev)
-    },
-    onSuccess: (_data, variables) => {
-      qc.invalidateQueries({ queryKey: qk.items(variables.businessId) })
     },
   })
 }
