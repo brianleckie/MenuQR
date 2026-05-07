@@ -1,12 +1,34 @@
+import logoUrl from '../../assets/menuqr-logo.svg'
+
+interface MenuQRLogoProps {
+  size?: number
+  showText?: boolean
+  className?: string
+  /** Render the brand logo image instead of the icon+text mark */
+  logoOnly?: boolean
+  /** Width in px when logoOnly=true (default 140) */
+  width?: number
+}
+
 export function MenuQRLogo({
   size = 32,
   showText = true,
   className = '',
-}: {
-  size?: number
-  showText?: boolean
-  className?: string
-}) {
+  logoOnly = false,
+  width = 140,
+}: MenuQRLogoProps) {
+  if (logoOnly) {
+    return (
+      <img
+        src={logoUrl}
+        alt="MenuQR"
+        width={width}
+        className={className}
+        style={{ display: 'block' }}
+      />
+    )
+  }
+
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       <svg width={size} height={size} viewBox="0 0 40 40" fill="none" aria-hidden="true">
