@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { QRCodeSVG } from 'qrcode.react'
 import { Link } from 'react-router-dom'
 import { SITE } from '../lib/site'
 import styles from './LandingPage.module.css'
@@ -174,8 +175,6 @@ export function LandingPage() {
 
       {/* ── HERO ── */}
       <section className={styles.hero}>
-        <div className={styles.heroEyebrow}>Hecho en Paraguay · 100% en guaraníes</div>
-
         <h1 className={styles.heroTitle}>
           El menú de tu local,<br />
           <span className={styles.accent}>en un solo escaneo.</span>
@@ -455,10 +454,32 @@ export function LandingPage() {
           </a>
         </div>
         <div className={styles.demoCtaVisual}>
-          <span className={styles.comment}># Tu URL queda así</span><br />
-          <span className={styles.url}>menuqr.py/<strong>tu-restaurante</strong></span><br /><br />
-          <span className={styles.comment}># Tu QR apunta acá</span><br />
-          <span>⬛⬜⬛⬛⬜⬛⬛<br />⬜⬛⬜⬜⬛⬜⬛<br />⬛⬛⬜⬛⬜⬛⬜<br />⬜⬛⬛⬜⬛⬛⬛</span>
+          <div style={{
+            background: '#fff',
+            borderRadius: 16,
+            padding: 24,
+            display: 'inline-flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 12,
+            boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
+            border: '1px solid var(--mq-line)',
+          }}>
+            <QRCodeSVG
+              value="https://menu-qr-sigma.vercel.app/menu/la-burger-co"
+              size={160}
+              fgColor="var(--mq-slate-deep)"
+              bgColor="#ffffff"
+              level="M"
+            />
+            <span style={{
+              fontFamily: 'monospace',
+              fontSize: 11,
+              color: 'var(--mq-ink-soft)',
+            }}>
+              menuqr.py/la-burger-co
+            </span>
+          </div>
         </div>
       </section>
 
