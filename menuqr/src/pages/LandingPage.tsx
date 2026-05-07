@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { SITE } from '../lib/site'
 import styles from './LandingPage.module.css'
 
@@ -51,9 +51,9 @@ const BrandLogo = ({ qrSize = 30, fontSize = 19 }: BrandLogoProps) => (
 
 // ── Modal "Quiero empezar" ─────────────────────────────────────────────────────
 
-interface StartModalProps { onClose: () => void }
+interface StartModalProps { onClose: () => void; onLogin: () => void }
 
-function StartModal({ onClose }: StartModalProps) {
+function StartModal({ onClose, onLogin }: StartModalProps) {
   const waUrl = `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent('Hola! Quiero crear mi menú digital con MenuQR')}`
 
   return (
@@ -127,17 +127,16 @@ function StartModal({ onClose }: StartModalProps) {
         </div>
 
         {/* Login link */}
-        <Link
-          to={SITE.loginUrl}
-          onClick={onClose}
+        <button
+          onClick={() => { onClose(); onLogin() }}
           style={{
-            display: 'block', textAlign: 'center',
-            fontSize: 14, fontWeight: 500,
-            color: 'var(--mq-slate-deep)', textDecoration: 'none',
+            display: 'block', width: '100%', textAlign: 'center',
+            fontSize: 14, fontWeight: 500, background: 'none', border: 'none',
+            color: 'var(--mq-slate-deep)', cursor: 'pointer', padding: 0,
           }}
         >
           Ingresar al panel →
-        </Link>
+        </button>
       </div>
     </div>
   )
@@ -147,6 +146,7 @@ function StartModal({ onClose }: StartModalProps) {
 
 export function LandingPage() {
   const [showModal, setShowModal] = useState(false)
+  const navigate = useNavigate()
 
   const openModal = () => setShowModal(true)
 
@@ -241,55 +241,85 @@ export function LandingPage() {
 
             {/* Phone mockup */}
             <div className={styles.phoneDevice}>
-              <div className={styles.phoneMockup}>
-                <div className={styles.phoneMockupScreen}>
-                  <div className={styles.dpCover} />
-                  <div className={styles.dpHeader}>
-                    <div className={styles.dpLogo}>L</div>
-                    <div className={styles.dpName}>La Estancia</div>
+              {/* Phone frame */}
+              <div style={{
+                width: 280, borderRadius: 40, background: '#111',
+                padding: 10,
+                boxShadow: '0 32px 64px rgba(0,0,0,0.25)',
+              }}>
+                {/* Notch */}
+                <div style={{
+                  height: 28, background: '#111',
+                  borderRadius: '30px 30px 0 0',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#333' }} />
+                </div>
+                {/* Screen */}
+                <div style={{
+                  borderRadius: 32, overflow: 'hidden', background: '#FAFAF8',
+                  height: 520, overflowY: 'auto',
+                  scrollbarWidth: 'none',
+                }}>
+                  {/* Cover */}
+                  <div style={{ position: 'relative', height: 110 }}>
+                    <img
+                      src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&q=70"
+                      alt=""
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                    />
+                    <div style={{
+                      position: 'absolute', inset: 0,
+                      background: 'linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.55))',
+                    }} />
+                    {/* Header overlay */}
+                    <div style={{
+                      position: 'absolute', bottom: 0, left: 0, right: 0,
+                      padding: '0 12px 10px',
+                      display: 'flex', alignItems: 'flex-end', gap: 8,
+                    }}>
+                      <div style={{
+                        width: 42, height: 42, borderRadius: 10,
+                        background: 'var(--mq-slate)', flexShrink: 0,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontFamily: 'Lora, Georgia, serif', color: '#fff', fontWeight: 700, fontSize: 18,
+                      }}>L</div>
+                      <div>
+                        <div style={{ color: '#fff', fontSize: 13, fontWeight: 700, lineHeight: 1.2 }}>La Estancia</div>
+                        <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: 10, lineHeight: 1.3 }}>Cocina paraguaya</div>
+                      </div>
+                    </div>
                   </div>
-                  <div className={styles.dpPills}>
-                    <div className={`${styles.dpPill} ${styles.dpPillActive}`}>Entradas</div>
-                    <div className={styles.dpPill}>Principales</div>
-                    <div className={styles.dpPill}>Postres</div>
+                  {/* Pills */}
+                  <div style={{ display: 'flex', gap: 6, padding: '10px 12px', flexWrap: 'nowrap', overflowX: 'auto', scrollbarWidth: 'none' }}>
+                    {['Entradas', 'Principales', 'Postres', 'Bebidas'].map((cat, i) => (
+                      <div key={cat} style={{
+                        padding: '5px 12px', borderRadius: 99, fontSize: 11, whiteSpace: 'nowrap',
+                        background: i === 0 ? 'var(--mq-slate-deep)' : '#EDE9E3',
+                        color: i === 0 ? '#fff' : 'var(--mq-ink-soft)',
+                        fontWeight: 500,
+                      }}>{cat}</div>
+                    ))}
                   </div>
-                  <div className={styles.dpGrid}>
-                    <div className={styles.dpCard}>
-                      <div className={styles.dpCardImg}>
-                        <img src="https://images.unsplash.com/photo-1604467794349-0b74285de7e7?w=200&q=60" alt="" />
+                  {/* Grid */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, padding: '0 10px 16px' }}>
+                    {[
+                      { img: 'https://images.unsplash.com/photo-1604467794349-0b74285de7e7?w=200&q=60', name: 'Empanadas de Carne', price: 'Gs. 18.000' },
+                      { img: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200&q=60', name: 'Sopa Paraguaya', price: 'Gs. 12.000' },
+                      { img: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=200&q=60', name: 'Mandioca Frita', price: 'Gs. 15.000' },
+                      { img: 'https://images.unsplash.com/photo-1558030006-450675393462?w=200&q=60', name: 'Asado de Tira', price: 'Gs. 85.000' },
+                    ].map((item) => (
+                      <div key={item.name} style={{
+                        background: '#fff', borderRadius: 10, overflow: 'hidden',
+                        boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+                      }}>
+                        <img src={item.img} alt="" style={{ width: '100%', height: 58, objectFit: 'cover', display: 'block' }} />
+                        <div style={{ padding: '6px 8px' }}>
+                          <div style={{ fontFamily: 'Lora, Georgia, serif', fontSize: 9.5, fontWeight: 700, color: '#1C1410', marginBottom: 2 }}>{item.name}</div>
+                          <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--mq-slate-deep)' }}>{item.price}</div>
+                        </div>
                       </div>
-                      <div className={styles.dpCardBody}>
-                        <div className={styles.dpCardName}>Empanadas</div>
-                        <div className={styles.dpCardPrice}>Gs. 18.000</div>
-                      </div>
-                    </div>
-                    <div className={styles.dpCard}>
-                      <div className={styles.dpCardImg}>
-                        <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200&q=60" alt="" />
-                      </div>
-                      <div className={styles.dpCardBody}>
-                        <div className={styles.dpCardName}>Sopa Paraguaya</div>
-                        <div className={styles.dpCardPrice}>Gs. 12.000</div>
-                      </div>
-                    </div>
-                    <div className={styles.dpCard}>
-                      <div className={styles.dpCardImg}>
-                        <img src="https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=200&q=60" alt="" />
-                      </div>
-                      <div className={styles.dpCardBody}>
-                        <div className={styles.dpCardName}>Mandioca</div>
-                        <div className={styles.dpCardPrice}>Gs. 15.000</div>
-                      </div>
-                    </div>
-                    <div className={styles.dpCard}>
-                      <div className={styles.dpCardImg}>
-                        <img src="https://images.unsplash.com/photo-1558030006-450675393462?w=200&q=60" alt="" />
-                      </div>
-                      <div className={styles.dpCardBody}>
-                        <div className={styles.dpCardName}>Asado de Tira</div>
-                        <div className={styles.dpCardPrice}>Gs. 85.000</div>
-                      </div>
-                    </div>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -466,18 +496,14 @@ export function LandingPage() {
             border: '1px solid var(--mq-line)',
           }}>
             <QRCodeSVG
-              value="https://menu-qr-sigma.vercel.app/menu/la-burger-co"
+              value={SITE.demoUrl}
               size={160}
               fgColor="var(--mq-slate-deep)"
               bgColor="#ffffff"
               level="M"
             />
-            <span style={{
-              fontFamily: 'monospace',
-              fontSize: 11,
-              color: 'var(--mq-ink-soft)',
-            }}>
-              menuqr.py/la-burger-co
+            <span style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--mq-ink-soft)' }}>
+              menuqr.lat/la-burger-co
             </span>
           </div>
         </div>
@@ -499,7 +525,7 @@ export function LandingPage() {
       </footer>
 
       {/* ── MODAL ── */}
-      {showModal && <StartModal onClose={() => setShowModal(false)} />}
+      {showModal && <StartModal onClose={() => setShowModal(false)} onLogin={() => navigate(SITE.loginUrl)} />}
 
     </div>
   )
