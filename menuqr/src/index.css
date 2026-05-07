@@ -5,7 +5,7 @@
 :root {
   --brand-color: #D4622A;
 
-  /* Landing page palette */
+  /* Landing page palette (legacy names — kept for LandingPage.module.css) */
   --cream: #F2EDE0;
   --cream-soft: #F7F3E8;
   --cream-deep: #E8E1CF;
@@ -16,6 +16,18 @@
   --ink: #2A2E33;
   --ink-soft: #5C6068;
   --line: #D9D1BF;
+
+  /* MenuQR brand — superficie pública y login */
+  --mq-cream: #F2EDE0;
+  --mq-cream-soft: #F7F3E8;
+  --mq-cream-deep: #E8E1CF;
+  --mq-slate: #7A8B9C;
+  --mq-slate-deep: #5C6D7E;
+  --mq-slate-soft: #A8B5C2;
+  --mq-ochre: #C99458;
+  --mq-ink: #2A2E33;
+  --mq-ink-soft: #5C6068;
+  --mq-line: #D9D1BF;
 }
 
 html {
