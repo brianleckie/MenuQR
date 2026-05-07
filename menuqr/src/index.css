@@ -4,6 +4,22 @@
 
 :root {
   --brand-color: #D4622A;
+
+  /* Landing page palette */
+  --cream: #F2EDE0;
+  --cream-soft: #F7F3E8;
+  --cream-deep: #E8E1CF;
+  --slate: #7A8B9C;
+  --slate-deep: #5C6D7E;
+  --slate-soft: #A8B5C2;
+  --ochre: #C99458;
+  --ink: #2A2E33;
+  --ink-soft: #5C6068;
+  --line: #D9D1BF;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 * {
