@@ -9,6 +9,45 @@ const CheckIcon = () => (
   </svg>
 )
 
+interface BrandLogoProps { qrSize?: number; fontSize?: number }
+const BrandLogo = ({ qrSize = 30, fontSize = 19 }: BrandLogoProps) => (
+  <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+    <svg width={qrSize} height={qrSize} viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg" style={{ color: 'var(--mq-ink)', flexShrink: 0 }}>
+      <rect x="1" y="1" width="7" height="7" rx="1" fill="currentColor"/>
+      <rect x="2.5" y="2.5" width="4" height="4" rx="0.4" fill="var(--mq-cream)"/>
+      <rect x="3.5" y="3.5" width="2" height="2" fill="currentColor"/>
+      <rect x="13" y="1" width="7" height="7" rx="1" fill="currentColor"/>
+      <rect x="14.5" y="2.5" width="4" height="4" rx="0.4" fill="var(--mq-cream)"/>
+      <rect x="15.5" y="3.5" width="2" height="2" fill="currentColor"/>
+      <rect x="1" y="13" width="7" height="7" rx="1" fill="currentColor"/>
+      <rect x="2.5" y="14.5" width="4" height="4" rx="0.4" fill="var(--mq-cream)"/>
+      <rect x="3.5" y="15.5" width="2" height="2" fill="currentColor"/>
+      <rect x="10" y="1" width="2" height="2" fill="currentColor"/>
+      <rect x="10" y="4" width="2" height="2" fill="currentColor"/>
+      <rect x="10" y="7" width="2" height="2" fill="currentColor"/>
+      <rect x="13" y="10" width="2" height="2" fill="currentColor"/>
+      <rect x="16" y="10" width="2" height="2" fill="currentColor"/>
+      <rect x="19" y="10" width="1" height="2" fill="currentColor"/>
+      <rect x="1"  y="10" width="2" height="2" fill="currentColor"/>
+      <rect x="4"  y="10" width="2" height="2" fill="currentColor"/>
+      <rect x="13" y="13" width="2" height="2" fill="currentColor"/>
+      <rect x="16" y="16" width="2" height="2" fill="currentColor"/>
+      <rect x="13" y="16" width="2" height="2" fill="currentColor"/>
+      <rect x="16" y="13" width="2" height="2" fill="currentColor"/>
+      <rect x="19" y="16" width="1" height="2" fill="currentColor"/>
+      <rect x="19" y="19" width="1" height="1" fill="currentColor"/>
+      <rect x="13" y="19" width="2" height="1" fill="currentColor"/>
+      <rect x="10" y="10" width="2" height="2" fill="currentColor"/>
+      <rect x="10" y="13" width="2" height="2" fill="currentColor"/>
+      <rect x="10" y="16" width="2" height="2" fill="currentColor"/>
+      <rect x="10" y="19" width="2" height="1" fill="currentColor"/>
+    </svg>
+    <span style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif", fontSize, fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--mq-ink)', lineHeight: 1 }}>
+      MenuQR<sup style={{ fontSize: '0.45em', verticalAlign: 'super', fontWeight: 700, letterSpacing: 0 }}>™</sup>
+    </span>
+  </div>
+)
+
 // ── Modal "Quiero empezar" ─────────────────────────────────────────────────────
 
 interface StartModalProps { onClose: () => void }
@@ -122,7 +161,7 @@ export function LandingPage() {
       {/* ── NAV ── */}
       <nav className={styles.nav}>
         <div className={styles.logo}>
-          <img src="/menuqr-logo.svg" alt="MenuQR" style={{ height: 36 }} />
+          <BrandLogo qrSize={32} fontSize={20} />
         </div>
         <div className={styles.navLinks}>
           <a href="#como">Cómo funciona</a>
@@ -426,7 +465,7 @@ export function LandingPage() {
       {/* ── FOOTER ── */}
       <footer className={styles.footer}>
         <div className={styles.logo}>
-          <img src="/menuqr-logo.svg" alt="MenuQR" style={{ height: 28 }} />
+          <BrandLogo qrSize={26} fontSize={17} />
         </div>
         <div className={styles.footLinks}>
           <a href="#como">Cómo funciona</a>
