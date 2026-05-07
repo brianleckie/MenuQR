@@ -1,19 +1,7 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { useState, type FormEvent } from 'react'
+import { Link } from 'react-router-dom'
 import { SITE } from '../lib/site'
 import styles from './LandingPage.module.css'
-
-// Logo SVG inline — reemplazar cuando haya logo definitivo
-const LogoSVG = () => (
-  <svg width="120" height="65" viewBox="0 0 1380 752" xmlns="http://www.w3.org/2000/svg">
-    <g transform="translate(0,752) scale(0.1,-0.1)" fill="currentColor" stroke="none">
-      <path d="M3475 5130 c-65 -8 -133 -25 -142 -34 -10 -10 23 -7 52 4 36 14 455 20 530 8 77 -12 101 -35 126 -124 l19 -69 -6 55 c-14 142 -52 161 -329 165 -104 2 -217 0 -250 -5z"/>
-      <path d="M3392 4550 c12 -37 58 -72 118 -91 58 -18 260 -18 315 1 42 14 105 56 105 71 0 5 -9 0 -20 -11 -29 -29 -63 -40 -154 -50 -94 -11 -253 3 -297 26 -17 8 -40 31 -51 50 -25 42 -30 43 -16 4z"/>
-      <path d="M4680 3149 c-115 -14 -225 -87 -294 -198 -14 -22 -26 -44 -26 -48 0 -5 11 9 24 31 80 129 202 197 344 192 80 -3 179 -30 208 -56 30 -29 41 -24 13 6 -56 61 -153 87 -269 73z"/>
-      <path d="M3406 3134 c-65 -20 -53 -27 25 -14 37 6 153 10 274 8 201 -3 212 -4 259 -28 26 -13 54 -34 62 -45 10 -14 14 -15 14 -5 -1 37 -44 66 -129 86 -81 19 -439 18 -505 -2z"/>
-      <path d="M5318 3135 c-76 -19 -140 -50 -169 -82 l-24 -27 32 22 c17 12 71 35 120 51 77 26 101 29 193 27 124 -2 209 -29 252 -81 10 -11 17 -15 18 -10 0 21 -32 55 -78 82 -43 26 -56 28 -167 30 -78 2 -140 -3 -177 -12z"/>
-    </g>
-  </svg>
-)
 
 const CheckIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
@@ -21,17 +9,111 @@ const CheckIcon = () => (
   </svg>
 )
 
-export function LandingPage() {
-  const navigate = useNavigate()
+// ── Modal "Quiero empezar" ─────────────────────────────────────────────────────
 
-  const handleSubmit = (e: React.FormEvent) => {
+interface StartModalProps { onClose: () => void }
+
+function StartModal({ onClose }: StartModalProps) {
+  const waUrl = `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent('Hola! Quiero crear mi menú digital con MenuQR')}`
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 100,
+        background: 'rgba(30,35,40,0.55)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: 16,
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: '100%', maxWidth: 480,
+          background: '#fff', borderRadius: 20,
+          padding: 36, position: 'relative',
+          boxShadow: '0 24px 48px -8px rgba(30,35,40,0.18)',
+        }}
+      >
+        {/* Close */}
+        <button
+          onClick={onClose}
+          style={{
+            position: 'absolute', top: 16, right: 16,
+            width: 32, height: 32, borderRadius: '50%',
+            background: 'var(--mq-cream-soft)', border: '1px solid var(--mq-line)',
+            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: 'var(--mq-ink-soft)',
+          }}
+          aria-label="Cerrar"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+
+        <h2 style={{ fontFamily: 'Lora, Georgia, serif', fontSize: 26, fontWeight: 600, color: 'var(--mq-ink)', marginBottom: 8, lineHeight: 1.2, marginTop: 0 }}>
+          ¡Empezá hoy!
+        </h2>
+        <p style={{ fontSize: 15, color: 'var(--mq-ink-soft)', lineHeight: 1.55, marginBottom: 24, marginTop: 0 }}>
+          Contactanos por WhatsApp y te configuramos el menú en el día.
+        </p>
+
+        {/* WhatsApp CTA */}
+        <a
+          href={waUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            gap: 10, width: '100%', background: '#25D366', color: '#fff',
+            borderRadius: 14, padding: '14px 20px',
+            fontSize: 15, fontWeight: 600, textDecoration: 'none',
+            marginBottom: 20,
+          }}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+            <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.553 4.116 1.524 5.845L.057 23.571a.5.5 0 0 0 .609.61l5.801-1.525A11.944 11.944 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 0 1-5.006-1.37l-.36-.213-3.724.977.993-3.63-.233-.374A9.818 9.818 0 0 1 2.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/>
+          </svg>
+          Quiero empezar por WhatsApp
+        </a>
+
+        {/* Separator */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+          <div style={{ flex: 1, height: 1, background: 'var(--mq-line)' }} />
+          <span style={{ fontSize: 12, color: 'var(--mq-ink-soft)', whiteSpace: 'nowrap' }}>o si ya tenés cuenta</span>
+          <div style={{ flex: 1, height: 1, background: 'var(--mq-line)' }} />
+        </div>
+
+        {/* Login link */}
+        <Link
+          to={SITE.loginUrl}
+          onClick={onClose}
+          style={{
+            display: 'block', textAlign: 'center',
+            fontSize: 14, fontWeight: 500,
+            color: 'var(--mq-slate-deep)', textDecoration: 'none',
+          }}
+        >
+          Ingresar al panel →
+        </Link>
+      </div>
+    </div>
+  )
+}
+
+// ── LandingPage ───────────────────────────────────────────────────────────────
+
+export function LandingPage() {
+  const [showModal, setShowModal] = useState(false)
+
+  const openModal = () => setShowModal(true)
+
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
     // TODO: pasar nombre como query param cuando el onboarding lo soporte
-    navigate(SITE.loginUrl)
-  }
-
-  const scrollToPricing = () => {
-    document.getElementById('precio')?.scrollIntoView({ behavior: 'smooth' })
+    openModal()
   }
 
   return (
@@ -40,7 +122,7 @@ export function LandingPage() {
       {/* ── NAV ── */}
       <nav className={styles.nav}>
         <div className={styles.logo}>
-          <LogoSVG />
+          <img src="/menuqr-logo.svg" alt="MenuQR" style={{ height: 36 }} />
         </div>
         <div className={styles.navLinks}>
           <a href="#como">Cómo funciona</a>
@@ -48,7 +130,7 @@ export function LandingPage() {
           <a href="#precio">Precio</a>
           <a href="#demo">Demo</a>
         </div>
-        <button className={styles.btnNav} onClick={scrollToPricing}>Empezar</button>
+        <button className={styles.btnNav} onClick={openModal}>Empezar</button>
       </nav>
 
       {/* ── HERO ── */}
@@ -78,7 +160,7 @@ export function LandingPage() {
             />
           </div>
           <button className={styles.qrBuilderCta} type="submit">
-            Generar mi QR
+            Generar mi QR gratis
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
               <path d="M5 12h14M13 6l6 6-6 6"/>
             </svg>
@@ -90,104 +172,94 @@ export function LandingPage() {
           <span>Sin app para tus clientes</span>
           <span>Listo en 5 minutos</span>
         </div>
+      </section>
 
-        {/* ── DEMO STAGE ── */}
-        <div className={styles.demoStage} id="demo">
-          <div className={styles.demoPaper} />
+      {/* ── PHONE SECTION ── */}
+      <div className={styles.phoneSectionOuter} id="demo">
+        <div className={styles.phoneSection}>
+          <div className={styles.phoneCols}>
 
-          <div className={styles.demoPhone}>
-            <div className={styles.demoPhoneScreen}>
-              <div className={styles.dpCover} />
-              <div className={styles.dpHeader}>
-                <div className={styles.dpLogo}>L</div>
-                <div className={styles.dpName}>La Estancia</div>
-              </div>
-              <div className={styles.dpPills}>
-                <div className={`${styles.dpPill} ${styles.dpPillActive}`}>Entradas</div>
-                <div className={styles.dpPill}>Principales</div>
-                <div className={styles.dpPill}>Postres</div>
-              </div>
-              <div className={styles.dpGrid}>
-                <div className={styles.dpCard}>
-                  <div className={styles.dpCardImg}>
-                    <img src="https://images.unsplash.com/photo-1604467794349-0b74285de7e7?w=200&q=60" alt="" />
+            {/* Text */}
+            <div className={styles.phoneText}>
+              <div className={styles.phoneTextEyebrow}>Vista del cliente</div>
+              <h2 className={styles.phoneTextTitle}>
+                Lo que ven tus clientes al escanear
+              </h2>
+              <p className={styles.phoneTextDesc}>
+                Sin descargar nada. Sin registrarse. Solo apuntan la cámara y ven tu menú al instante.
+              </p>
+              <a
+                href={SITE.demoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.phoneTextLink}
+              >
+                {SITE.demoUrl.replace('https://', '')}
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <path d="M7 17L17 7M7 7h10v10"/>
+                </svg>
+              </a>
+            </div>
+
+            {/* Phone mockup */}
+            <div className={styles.phoneDevice}>
+              <div className={styles.phoneMockup}>
+                <div className={styles.phoneMockupScreen}>
+                  <div className={styles.dpCover} />
+                  <div className={styles.dpHeader}>
+                    <div className={styles.dpLogo}>L</div>
+                    <div className={styles.dpName}>La Estancia</div>
                   </div>
-                  <div className={styles.dpCardBody}>
-                    <div className={styles.dpCardName}>Empanadas</div>
-                    <div className={styles.dpCardPrice}>Gs. 18.000</div>
+                  <div className={styles.dpPills}>
+                    <div className={`${styles.dpPill} ${styles.dpPillActive}`}>Entradas</div>
+                    <div className={styles.dpPill}>Principales</div>
+                    <div className={styles.dpPill}>Postres</div>
                   </div>
-                </div>
-                <div className={styles.dpCard}>
-                  <div className={styles.dpCardImg}>
-                    <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200&q=60" alt="" />
-                  </div>
-                  <div className={styles.dpCardBody}>
-                    <div className={styles.dpCardName}>Sopa Paraguaya</div>
-                    <div className={styles.dpCardPrice}>Gs. 12.000</div>
-                  </div>
-                </div>
-                <div className={styles.dpCard}>
-                  <div className={styles.dpCardImg}>
-                    <img src="https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=200&q=60" alt="" />
-                  </div>
-                  <div className={styles.dpCardBody}>
-                    <div className={styles.dpCardName}>Mandioca</div>
-                    <div className={styles.dpCardPrice}>Gs. 15.000</div>
-                  </div>
-                </div>
-                <div className={styles.dpCard}>
-                  <div className={styles.dpCardImg}>
-                    <img src="https://images.unsplash.com/photo-1558030006-450675393462?w=200&q=60" alt="" />
-                  </div>
-                  <div className={styles.dpCardBody}>
-                    <div className={styles.dpCardName}>Asado de Tira</div>
-                    <div className={styles.dpCardPrice}>Gs. 85.000</div>
+                  <div className={styles.dpGrid}>
+                    <div className={styles.dpCard}>
+                      <div className={styles.dpCardImg}>
+                        <img src="https://images.unsplash.com/photo-1604467794349-0b74285de7e7?w=200&q=60" alt="" />
+                      </div>
+                      <div className={styles.dpCardBody}>
+                        <div className={styles.dpCardName}>Empanadas</div>
+                        <div className={styles.dpCardPrice}>Gs. 18.000</div>
+                      </div>
+                    </div>
+                    <div className={styles.dpCard}>
+                      <div className={styles.dpCardImg}>
+                        <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200&q=60" alt="" />
+                      </div>
+                      <div className={styles.dpCardBody}>
+                        <div className={styles.dpCardName}>Sopa Paraguaya</div>
+                        <div className={styles.dpCardPrice}>Gs. 12.000</div>
+                      </div>
+                    </div>
+                    <div className={styles.dpCard}>
+                      <div className={styles.dpCardImg}>
+                        <img src="https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=200&q=60" alt="" />
+                      </div>
+                      <div className={styles.dpCardBody}>
+                        <div className={styles.dpCardName}>Mandioca</div>
+                        <div className={styles.dpCardPrice}>Gs. 15.000</div>
+                      </div>
+                    </div>
+                    <div className={styles.dpCard}>
+                      <div className={styles.dpCardImg}>
+                        <img src="https://images.unsplash.com/photo-1558030006-450675393462?w=200&q=60" alt="" />
+                      </div>
+                      <div className={styles.dpCardBody}>
+                        <div className={styles.dpCardName}>Asado de Tira</div>
+                        <div className={styles.dpCardPrice}>Gs. 85.000</div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className={styles.demoQr}>
-            <div className={styles.demoQrLabel}>Tu QR</div>
-            <div className={styles.demoQrCode}>
-              <svg width="124" height="124" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
-                <rect width="21" height="21" fill="#fff"/>
-                <g fill="#5C6D7E">
-                  <rect x="0" y="0" width="7" height="7"/>
-                  <rect x="14" y="0" width="7" height="7"/>
-                  <rect x="0" y="14" width="7" height="7"/>
-                </g>
-                <g fill="#fff">
-                  <rect x="1" y="1" width="5" height="5"/>
-                  <rect x="15" y="1" width="5" height="5"/>
-                  <rect x="1" y="15" width="5" height="5"/>
-                </g>
-                <g fill="#5C6D7E">
-                  <rect x="2" y="2" width="3" height="3"/>
-                  <rect x="16" y="2" width="3" height="3"/>
-                  <rect x="2" y="16" width="3" height="3"/>
-                  <rect x="8" y="0" width="2" height="2"/>
-                  <rect x="11" y="1" width="2" height="2"/>
-                  <rect x="8" y="4" width="3" height="2"/>
-                  <rect x="9" y="8" width="2" height="3"/>
-                  <rect x="12" y="9" width="2" height="2"/>
-                  <rect x="15" y="8" width="2" height="2"/>
-                  <rect x="14" y="11" width="3" height="2"/>
-                  <rect x="18" y="10" width="3" height="2"/>
-                  <rect x="8" y="14" width="2" height="2"/>
-                  <rect x="11" y="15" width="2" height="3"/>
-                  <rect x="14" y="16" width="2" height="2"/>
-                  <rect x="17" y="14" width="2" height="4"/>
-                </g>
-                <rect x="9" y="3" width="2" height="2" fill="#C99458"/>
-                <rect x="13" y="13" width="2" height="2" fill="#C99458"/>
-              </svg>
-            </div>
-            <div className={styles.demoQrUrl}>menuqr.py/la-estancia</div>
           </div>
         </div>
-      </section>
+      </div>
 
       {/* ── CÓMO FUNCIONA ── */}
       <section className={styles.howSection} id="como">
@@ -200,7 +272,6 @@ export function LandingPage() {
             Cargás tu menú una vez. Lo actualizás cuando quieras. Tus clientes lo ven al instante.
           </p>
         </div>
-
         <div className={styles.steps}>
           <div className={styles.step}>
             <div className={`${styles.stepNum} ${styles.serif}`}>01<sup>·</sup></div>
@@ -231,7 +302,6 @@ export function LandingPage() {
             Nada de funciones que sólo confunden. Todo lo justo para vender más sin complicarte.
           </p>
         </div>
-
         <div className={styles.featuresGrid}>
           <div className={styles.feature}>
             <div className={styles.featureIcon}>
@@ -311,7 +381,7 @@ export function LandingPage() {
             <span className={styles.currency}>Gs. / mes</span>
           </div>
           <div className={styles.pricePeriod}>
-            Probalo <strong style={{ color: 'var(--slate-deep)' }}>14 días gratis</strong> · sin tarjeta de crédito
+            Probalo <strong style={{ color: 'var(--mq-slate-deep)' }}>14 días gratis</strong> · sin tarjeta de crédito
           </div>
 
           <ul className={styles.priceFeatures}>
@@ -323,9 +393,9 @@ export function LandingPage() {
             <li><CheckIcon />Soporte por WhatsApp en español</li>
           </ul>
 
-          <Link to={SITE.loginUrl} className={styles.priceCta}>
+          <button className={styles.priceCta} onClick={openModal}>
             Empezar mis 14 días gratis
-          </Link>
+          </button>
           <p className={styles.priceNote}>Después: Gs. 40.000/mes · Pago por transferencia o QR local</p>
         </div>
       </section>
@@ -356,7 +426,7 @@ export function LandingPage() {
       {/* ── FOOTER ── */}
       <footer className={styles.footer}>
         <div className={styles.logo}>
-          <LogoSVG />
+          <img src="/menuqr-logo.svg" alt="MenuQR" style={{ height: 28 }} />
         </div>
         <div className={styles.footLinks}>
           <a href="#como">Cómo funciona</a>
@@ -367,6 +437,9 @@ export function LandingPage() {
         </div>
         <div className={styles.footCopy}>© 2026 MenuQR · Asunción, Paraguay</div>
       </footer>
+
+      {/* ── MODAL ── */}
+      {showModal && <StartModal onClose={() => setShowModal(false)} />}
 
     </div>
   )

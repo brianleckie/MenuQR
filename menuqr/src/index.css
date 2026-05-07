@@ -18,16 +18,16 @@
   --line: #D9D1BF;
 
   /* MenuQR brand — superficie pública y login */
-  --mq-cream: #F2EDE0;
-  --mq-cream-soft: #F7F3E8;
-  --mq-cream-deep: #E8E1CF;
-  --mq-slate: #7A8B9C;
-  --mq-slate-deep: #5C6D7E;
+  --mq-cream: #F8F5EE;
+  --mq-cream-soft: #FDFBF7;
+  --mq-cream-deep: #EDE7D9;
+  --mq-slate: #6B7F92;
+  --mq-slate-deep: #4A5F72;
   --mq-slate-soft: #A8B5C2;
   --mq-ochre: #C99458;
-  --mq-ink: #2A2E33;
-  --mq-ink-soft: #5C6068;
-  --mq-line: #D9D1BF;
+  --mq-ink: #1E2328;
+  --mq-ink-soft: #52585F;
+  --mq-line: #DDD7C8;
 }
 
 html {
