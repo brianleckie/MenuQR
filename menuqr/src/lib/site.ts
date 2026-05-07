@@ -1,7 +1,7 @@
-// Cambiar estos valores cuando se compre dominio propio
+// VITE_APP_URL=https://menuqr.lat — actualizar en Vercel Dashboard → Settings → Environment Variables
 export const SITE = {
-  appUrl: import.meta.env.VITE_APP_URL ?? 'https://menu-qr-sigma.vercel.app',
-  demoUrl: 'https://menu-qr-sigma.vercel.app/menu/la-burger-co',
+  appUrl: 'https://menuqr.lat',
+  demoUrl: 'https://menuqr.lat/menu/la-burger-co',
   whatsapp: import.meta.env.VITE_CONTACT_WHATSAPP ?? '595991234567',
   loginUrl: '/admin/login',
 } as const
