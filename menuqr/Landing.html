@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MenuQR — Generá el QR de tu menú en segundos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#F2EDE0;        /* fondo principal cremita */
+  --cream-soft:#F7F3E8;   /* tarjetas claras */
+  --cream-deep:#E8E1CF;   /* divisores / bordes */
+  --slate:#7A8B9C;        /* azul-grisáceo del logo */
+  --slate-deep:#5C6D7E;   /* hover / texto fuerte */
+  --slate-soft:#A8B5C2;   /* acentos suaves */
+  --ochre:#C99458;        /* el detalle naranjita del logo */
+  --ink:#2A2E33;          /* texto principal */
+  --ink-soft:#5C6068;     /* texto secundario */
+  --line:#D9D1BF;         /* líneas finas */
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:"Helvetica Neue",Helvetica,Arial,"Inter",sans-serif;
+  background:var(--cream);
+  color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+}
+.serif{font-family:inherit;font-weight:600;letter-spacing:-0.02em}
+a{color:inherit;text-decoration:none}
+
+/* ── NAV ── */
+nav{
+  position:sticky;top:0;z-index:50;
+  background:rgba(242,237,224,0.85);
+  backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+  padding:14px 32px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.logo{display:flex;align-items:center;gap:10px}
+.logo img{height:34px;width:auto;display:block}
+.logo-text{font-weight:700;font-size:17px;color:var(--slate-deep);letter-spacing:-0.02em}
+.logo-text sup{font-size:9px;color:var(--slate);font-weight:500;margin-left:2px}
+.nav-links{display:flex;gap:30px;align-items:center}
+.nav-links a{font-size:14px;color:var(--ink-soft);font-weight:500;transition:color .15s}
+.nav-links a:hover{color:var(--ink)}
+.btn-nav{
+  padding:9px 18px;border-radius:99px;border:none;cursor:pointer;
+  background:var(--slate-deep);color:#fff;font-weight:600;font-size:14px;
+  font-family:inherit;transition:background .15s;
+}
+.btn-nav:hover{background:var(--ink)}
+
+/* ── HERO ── */
+.hero{
+  padding:72px 32px 100px;
+  max-width:1200px;margin:0 auto;
+  text-align:center;
+  position:relative;
+}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:6px 14px;border-radius:99px;
+  background:var(--cream-soft);border:1px solid var(--line);
+  font-size:13px;color:var(--slate-deep);font-weight:500;
+  margin-bottom:32px;
+}
+.hero-eyebrow::before{
+  content:"";width:6px;height:6px;border-radius:50%;background:var(--ochre);
+}
+h1.hero-title{
+  font-size:clamp(40px,6.4vw,76px);
+  line-height:1.05;letter-spacing:-0.035em;
+  color:var(--ink);
+  max-width:880px;margin:0 auto 24px;
+  font-weight:700;
+}
+h1.hero-title .accent{
+  font-weight:600;
+  color:var(--slate);
+}
+.hero-sub{
+  font-size:18px;line-height:1.55;color:var(--ink-soft);
+  max-width:560px;margin:0 auto 44px;
+}
+
+/* ── BUSCADOR estilo qr-generator ── */
+.qr-builder{
+  max-width:640px;margin:0 auto 48px;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:24px;
+  padding:8px;
+  box-shadow:0 1px 0 rgba(0,0,0,0.02), 0 24px 60px -20px rgba(92,109,126,0.18);
+  display:flex;align-items:center;gap:8px;
+}
+.qr-builder-input{
+  flex:1;
+  display:flex;align-items:center;gap:12px;
+  padding:14px 18px;
+  border-radius:18px;
+  background:transparent;
+}
+.qr-builder-input svg{flex-shrink:0;color:var(--slate)}
+.qr-builder-input input{
+  flex:1;border:none;outline:none;background:transparent;
+  font-family:inherit;font-size:16px;color:var(--ink);
+  font-weight:500;
+}
+.qr-builder-input input::placeholder{color:#A8A39A}
+.qr-builder-cta{
+  padding:14px 24px;
+  border-radius:16px;border:none;cursor:pointer;
+  background:var(--slate-deep);color:#fff;
+  font-family:inherit;font-weight:600;font-size:15px;
+  display:flex;align-items:center;gap:8px;
+  transition:background .15s;
+  white-space:nowrap;
+}
+.qr-builder-cta:hover{background:var(--ink)}
+
+.hero-meta{
+  display:flex;justify-content:center;gap:24px;flex-wrap:wrap;
+  font-size:13px;color:var(--ink-soft);
+}
+.hero-meta span{display:inline-flex;align-items:center;gap:6px}
+.hero-meta span::before{
+  content:"✓";color:var(--slate);font-weight:700;font-size:14px;
+}
+
+/* ── DEMO STAGE ── */
+.demo-stage{
+  margin-top:80px;
+  position:relative;
+  display:flex;justify-content:center;align-items:flex-end;
+  gap:24px;
+  padding:32px 0 0;
+}
+.demo-paper{
+  position:absolute;inset:60px -40px 0;
+  background:var(--cream-soft);
+  border-radius:32px;
+  border:1px solid var(--line);
+  z-index:0;
+}
+.demo-phone{
+  position:relative;z-index:2;
+  width:280px;
+  background:#1A1A1F;
+  border-radius:42px;
+  padding:8px;
+  box-shadow:0 30px 60px -10px rgba(92,109,126,0.35), 0 0 0 1px rgba(0,0,0,0.04);
+}
+.demo-phone-screen{
+  background:var(--cream);
+  border-radius:34px;overflow:hidden;
+  height:540px;display:flex;flex-direction:column;
+}
+.dp-cover{
+  height:120px;
+  background:linear-gradient(135deg,#5C6D7E,#7A8B9C);
+  position:relative;overflow:hidden;
+}
+.dp-cover::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(to bottom,transparent 50%,rgba(0,0,0,0.4));
+}
+.dp-header{padding:0 14px;margin-top:-22px;position:relative;z-index:2;display:flex;align-items:flex-end;gap:10px}
+.dp-logo{
+  width:46px;height:46px;border-radius:12px;
+  background:#fff;border:2px solid var(--cream);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:18px;color:var(--slate-deep);
+}
+.dp-name{color:#fff;font-weight:600;font-size:15px;padding-bottom:6px}
+.dp-pills{display:flex;gap:6px;padding:14px 14px 8px;overflow-x:auto}
+.dp-pills::-webkit-scrollbar{display:none}
+.dp-pill{flex-shrink:0;padding:5px 12px;border-radius:99px;font-size:11px;font-weight:500;background:var(--cream-soft);color:var(--ink-soft)}
+.dp-pill.active{background:var(--slate-deep);color:#fff}
+.dp-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 14px 14px}
+.dp-card{background:#fff;border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+.dp-card-img{height:62px;background:var(--cream-soft);overflow:hidden}
+.dp-card-img img{width:100%;height:100%;object-fit:cover;display:block}
+.dp-card-body{padding:7px 9px}
+.dp-card-name{font-weight:600;font-size:12px;color:var(--ink);line-height:1.2;margin-bottom:2px;letter-spacing:-0.01em}
+.dp-card-price{font-size:11px;font-weight:600;color:var(--slate-deep)}
+
+/* QR floating card */
+.demo-qr{
+  position:relative;z-index:1;
+  width:200px;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:20px;padding:18px;
+  box-shadow:0 20px 40px -10px rgba(92,109,126,0.25);
+  transform:translateY(-60px) rotate(-4deg);
+  display:flex;flex-direction:column;align-items:center;
+}
+.demo-qr-label{font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;font-weight:500}
+.demo-qr-code{
+  width:140px;height:140px;background:#fff;border:1px solid var(--cream-deep);
+  border-radius:8px;padding:8px;
+  display:flex;align-items:center;justify-content:center;
+}
+.demo-qr-url{font-size:11px;color:var(--slate);font-family:"JetBrains Mono",monospace;margin-top:10px}
+
+/* ── HOW IT WORKS ── */
+.how-section{
+  background:var(--cream-soft);
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  padding:96px 32px;
+}
+.section-head{max-width:1100px;margin:0 auto 56px;text-align:center}
+.section-eyebrow{
+  display:inline-block;padding:5px 14px;border-radius:99px;
+  background:rgba(122,139,156,0.15);color:var(--slate-deep);
+  font-size:12px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;
+  margin-bottom:18px;
+}
+.section-title{
+  font-size:clamp(30px,4.2vw,46px);
+  line-height:1.1;letter-spacing:-0.03em;
+  color:var(--ink);margin-bottom:14px;
+  font-weight:700;
+}
+.section-title .accent{color:var(--slate)}
+.section-sub{font-size:17px;color:var(--ink-soft);max-width:560px;margin:0 auto;line-height:1.55}
+
+.steps{
+  max-width:1100px;margin:0 auto;
+  display:grid;grid-template-columns:repeat(3,1fr);gap:24px;
+}
+.step{
+  background:#fff;border:1px solid var(--line);
+  border-radius:20px;padding:32px 28px;
+  position:relative;
+}
+.step-num{
+  font-weight:700;font-size:30px;color:var(--slate);
+  line-height:1;margin-bottom:18px;letter-spacing:-0.03em;
+}
+.step-num sup{font-size:14px;margin-left:2px;color:var(--slate-soft);font-weight:500}
+.step-title{font-size:19px;font-weight:600;margin-bottom:8px;color:var(--ink);letter-spacing:-0.01em}
+.step-desc{font-size:14.5px;color:var(--ink-soft);line-height:1.6}
+
+/* ── FEATURES ── */
+.features-section{padding:96px 32px;max-width:1200px;margin:0 auto}
+.features-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:20px;
+}
+.feature{
+  padding:28px;border-radius:18px;
+  background:var(--cream-soft);border:1px solid var(--line);
+}
+.feature-icon{
+  width:42px;height:42px;border-radius:11px;
+  background:#fff;border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--slate-deep);margin-bottom:18px;
+}
+.feature-title{font-size:17px;font-weight:600;color:var(--ink);margin-bottom:6px;letter-spacing:-0.01em}
+.feature-desc{font-size:14px;color:var(--ink-soft);line-height:1.6}
+
+/* ── PRICING ── */
+.pricing-section{
+  background:var(--cream-soft);
+  border-top:1px solid var(--line);
+  padding:96px 32px;
+}
+.price-card{
+  max-width:480px;margin:0 auto;
+  background:#fff;border:1px solid var(--line);
+  border-radius:24px;padding:40px;
+  position:relative;
+  box-shadow:0 24px 48px -16px rgba(92,109,126,0.15);
+}
+.price-ribbon{
+  position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+  background:var(--ochre);color:#fff;
+  padding:5px 14px;border-radius:99px;
+  font-size:11px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;
+}
+.price-name{font-size:14px;color:var(--ink-soft);font-weight:500;margin-bottom:12px;text-transform:uppercase;letter-spacing:0.06em}
+.price-amount{
+  display:flex;align-items:baseline;gap:6px;margin-bottom:6px;
+}
+.price-amount .num{font-weight:700;font-size:56px;color:var(--ink);line-height:1;letter-spacing:-0.03em}
+.price-amount .currency{font-size:18px;color:var(--ink-soft);font-weight:500}
+.price-period{font-size:14px;color:var(--ink-soft);margin-bottom:28px}
+.price-features{list-style:none;display:flex;flex-direction:column;gap:11px;margin-bottom:32px}
+.price-features li{display:flex;align-items:flex-start;gap:10px;font-size:14.5px;color:var(--ink);line-height:1.45}
+.price-features svg{flex-shrink:0;margin-top:2px;color:var(--slate)}
+.price-cta{
+  width:100%;padding:14px;border-radius:14px;border:none;cursor:pointer;
+  background:var(--slate-deep);color:#fff;font-family:inherit;
+  font-weight:600;font-size:15px;transition:background .15s;
+}
+.price-cta:hover{background:var(--ink)}
+.price-note{
+  text-align:center;margin-top:14px;font-size:13px;color:var(--ink-soft);
+}
+
+/* ── FAQ-ish demo CTA ── */
+.demo-cta{
+  max-width:1100px;margin:0 auto;padding:96px 32px;
+  display:grid;grid-template-columns:1.2fr 1fr;gap:48px;align-items:center;
+}
+.demo-cta-text h2{margin-bottom:16px}
+.demo-cta-text p{font-size:16px;color:var(--ink-soft);line-height:1.6;margin-bottom:24px}
+.demo-cta-link{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:12px 22px;border-radius:99px;
+  background:var(--ink);color:#fff;font-weight:500;font-size:14.5px;
+  transition:background .15s;
+}
+.demo-cta-link:hover{background:var(--slate-deep)}
+.demo-cta-visual{
+  background:#fff;border:1px solid var(--line);
+  border-radius:20px;padding:24px;
+  font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--ink-soft);
+  line-height:1.7;
+}
+.demo-cta-visual .url{color:var(--slate-deep);font-weight:600}
+.demo-cta-visual .comment{color:var(--ochre)}
+
+/* ── FOOTER ── */
+footer{
+  background:var(--cream);
+  border-top:1px solid var(--line);
+  padding:36px 32px;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:18px;
+}
+.foot-links{display:flex;gap:22px}
+.foot-links a{font-size:13px;color:var(--ink-soft);transition:color .15s}
+.foot-links a:hover{color:var(--ink)}
+.foot-copy{font-size:12px;color:var(--ink-soft)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:880px){
+  .nav-links{display:none}
+  .steps{grid-template-columns:1fr}
+  .features-grid{grid-template-columns:1fr 1fr}
+  .demo-cta{grid-template-columns:1fr}
+  .demo-stage{flex-direction:column;align-items:center}
+  .demo-qr{transform:rotate(-3deg);margin-top:20px}
+  .demo-paper{display:none}
+}
+@media(max-width:560px){
+  nav{padding:12px 18px}
+  .hero{padding:48px 18px 64px}
+  .qr-builder{flex-direction:column;padding:10px;gap:6px}
+  .qr-builder-input{width:100%}
+  .qr-builder-cta{width:100%;justify-content:center}
+  .features-grid{grid-template-columns:1fr}
+  .how-section,.pricing-section,.features-section{padding:64px 18px}
+  footer{flex-direction:column;text-align:center}
+  h1.hero-title{font-size:42px}
+}
+</style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <div class="logo">
+    <img src="assets/menuqr-logo.png" alt="MenuQR" />
+  </div>
+  <div class="nav-links">
+    <a href="#como">Cómo funciona</a>
+    <a href="#funciones">Funciones</a>
+    <a href="#precio">Precio</a>
+    <a href="#demo">Demo</a>
+  </div>
+  <button class="btn-nav" onclick="document.getElementById('precio').scrollIntoView({behavior:'smooth'})">Empezar</button>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="hero-eyebrow">Hecho en Paraguay · 100% en guaraníes</div>
+
+  <h1 class="hero-title">
+    El menú de tu local,<br/>
+    <span class="accent">en un solo escaneo.</span>
+  </h1>
+  <div style="font-size:13px;color:var(--ink-soft);margin-top:-12px;margin-bottom:24px">14 días gratis · después Gs. 40.000/mes</div>
+
+  <p class="hero-sub">
+    Tus clientes apuntan la cámara, ven tus platos con fotos y precios actualizados, y piden por WhatsApp. Vos no imprimís nada nunca más.
+  </p>
+
+  <!-- Buscador estilo qr-generator -->
+  <form class="qr-builder" onsubmit="event.preventDefault();document.getElementById('precio').scrollIntoView({behavior:'smooth'})">
+    <div class="qr-builder-input">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4"/>
+        <path d="M9 9v.01M9 12v.01M9 15v.01M9 18v.01"/>
+      </svg>
+      <input type="text" placeholder="Nombre de tu restaurante..." aria-label="Nombre del restaurante" />
+    </div>
+    <button class="qr-builder-cta" type="submit">
+      Generar mi QR
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <path d="M5 12h14M13 6l6 6-6 6"/>
+      </svg>
+    </button>
+  </form>
+
+  <div class="hero-meta">
+    <span>Sin tarjeta</span>
+    <span>Sin app para tus clientes</span>
+    <span>Listo en 5 minutos</span>
+  </div>
+
+  <!-- Demo stage -->
+  <div class="demo-stage" id="demo">
+    <div class="demo-paper"></div>
+
+    <div class="demo-phone">
+      <div class="demo-phone-screen">
+        <div class="dp-cover"></div>
+        <div class="dp-header">
+          <div class="dp-logo">L</div>
+          <div class="dp-name">La Estancia</div>
+        </div>
+        <div class="dp-pills">
+          <div class="dp-pill active">Entradas</div>
+          <div class="dp-pill">Principales</div>
+          <div class="dp-pill">Postres</div>
+        </div>
+        <div class="dp-grid">
+          <div class="dp-card">
+            <div class="dp-card-img"><img src="https://images.unsplash.com/photo-1604467794349-0b74285de7e7?w=200&q=60" alt=""/></div>
+            <div class="dp-card-body">
+              <div class="dp-card-name">Empanadas</div>
+              <div class="dp-card-price">Gs. 18.000</div>
+            </div>
+          </div>
+          <div class="dp-card">
+            <div class="dp-card-img"><img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200&q=60" alt=""/></div>
+            <div class="dp-card-body">
+              <div class="dp-card-name">Sopa Paraguaya</div>
+              <div class="dp-card-price">Gs. 12.000</div>
+            </div>
+          </div>
+          <div class="dp-card">
+            <div class="dp-card-img"><img src="https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=200&q=60" alt=""/></div>
+            <div class="dp-card-body">
+              <div class="dp-card-name">Mandioca</div>
+              <div class="dp-card-price">Gs. 15.000</div>
+            </div>
+          </div>
+          <div class="dp-card">
+            <div class="dp-card-img"><img src="https://images.unsplash.com/photo-1558030006-450675393462?w=200&q=60" alt=""/></div>
+            <div class="dp-card-body">
+              <div class="dp-card-name">Asado de Tira</div>
+              <div class="dp-card-price">Gs. 85.000</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-qr">
+      <div class="demo-qr-label">Tu QR</div>
+      <div class="demo-qr-code">
+        <svg width="124" height="124" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+          <rect width="21" height="21" fill="#fff"/>
+          <g fill="#5C6D7E">
+            <rect x="0" y="0" width="7" height="7"/>
+            <rect x="14" y="0" width="7" height="7"/>
+            <rect x="0" y="14" width="7" height="7"/>
+          </g>
+          <g fill="#fff">
+            <rect x="1" y="1" width="5" height="5"/>
+            <rect x="15" y="1" width="5" height="5"/>
+            <rect x="1" y="15" width="5" height="5"/>
+          </g>
+          <g fill="#5C6D7E">
+            <rect x="2" y="2" width="3" height="3"/>
+            <rect x="16" y="2" width="3" height="3"/>
+            <rect x="2" y="16" width="3" height="3"/>
+            <rect x="8" y="0" width="2" height="2"/>
+            <rect x="11" y="1" width="2" height="2"/>
+            <rect x="8" y="4" width="3" height="2"/>
+            <rect x="9" y="8" width="2" height="3"/>
+            <rect x="12" y="9" width="2" height="2"/>
+            <rect x="15" y="8" width="2" height="2"/>
+            <rect x="14" y="11" width="3" height="2"/>
+            <rect x="18" y="10" width="3" height="2"/>
+            <rect x="8" y="14" width="2" height="2"/>
+            <rect x="11" y="15" width="2" height="3"/>
+            <rect x="14" y="16" width="2" height="2"/>
+            <rect x="17" y="14" width="2" height="4"/>
+          </g>
+          <rect x="9" y="3" width="2" height="2" fill="#C99458"/>
+          <rect x="13" y="13" width="2" height="2" fill="#C99458"/>
+        </svg>
+      </div>
+      <div class="demo-qr-url">menuqr.py/la-estancia</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CÓMO FUNCIONA ── -->
+<section class="how-section" id="como">
+  <div class="section-head">
+    <div class="section-eyebrow">Cómo funciona</div>
+    <h2 class="section-title serif">Tres pasos. <span class="accent">Sin técnicos.</span></h2>
+    <p class="section-sub">Cargás tu menú una vez. Lo actualizás cuando quieras. Tus clientes lo ven al instante.</p>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num serif">01<sup>·</sup></div>
+      <div class="step-title">Cargá tu menú</div>
+      <div class="step-desc">Categorías, platos, fotos y precios. Todo desde tu celular o computadora, en minutos.</div>
+    </div>
+    <div class="step">
+      <div class="step-num serif">02<sup>·</sup></div>
+      <div class="step-title">Imprimí tu QR</div>
+      <div class="step-desc">Descargás el QR en PNG o PDF. Lo pegás en las mesas, mostrador o el frente del local.</div>
+    </div>
+    <div class="step">
+      <div class="step-num serif">03<sup>·</sup></div>
+      <div class="step-title">Recibí pedidos</div>
+      <div class="step-desc">Tus clientes escanean, eligen y te mandan el pedido por WhatsApp con el total armado.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FUNCIONES ── -->
+<section class="features-section" id="funciones">
+  <div class="section-head">
+    <div class="section-eyebrow">Funciones</div>
+    <h2 class="section-title serif">Lo que <span class="accent">de verdad</span> necesitás.</h2>
+    <p class="section-sub">Nada de funciones que sólo confunden. Todo lo justo para vender más sin complicarte.</p>
+  </div>
+
+  <div class="features-grid">
+    <div class="feature">
+      <div class="feature-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+      </div>
+      <div class="feature-title">Menú al instante</div>
+      <div class="feature-desc">Tus clientes apuntan la cámara y ven tus platos en 2 segundos. Sin descargar nada.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      </div>
+      <div class="feature-title">Cambios al toque</div>
+      <div class="feature-desc">¿Se agotó algo? Lo marcás y tus clientes lo ven al instante. No reimprimís nada.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <div class="feature-title">Pedidos por WhatsApp</div>
+      <div class="feature-desc">Tus clientes te mandan el pedido armado, con productos y total. Vos sólo confirmás.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+      </div>
+      <div class="feature-title">Tu identidad</div>
+      <div class="feature-desc">Logo, foto de portada y color de marca propio. No un template genérico.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      </div>
+      <div class="feature-title">QR para imprimir</div>
+      <div class="feature-desc">Descargá tu QR en PNG o PDF, listo para mesas, mostrador o redes sociales.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+      </div>
+      <div class="feature-title">Soporte en español</div>
+      <div class="feature-desc">Si tenés una duda, te respondemos por WhatsApp. Sin tickets, sin formularios.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PRECIO ── -->
+<section class="pricing-section" id="precio">
+  <div class="section-head">
+    <div class="section-eyebrow">Precio</div>
+    <h2 class="section-title serif">Un solo plan, <span class="accent">todo incluido.</span></h2>
+    <p class="section-sub">Sin tarifas ocultas, sin dólares, sin sorpresas. Cancelás cuando quieras.</p>
+  </div>
+
+  <div class="price-card">
+    <div class="price-ribbon">14 días gratis</div>
+    <div class="price-name">Plan Restaurante</div>
+    <div class="price-amount">
+      <span class="num">40.000</span>
+      <span class="currency">Gs. / mes</span>
+    </div>
+    <div class="price-period">Probalo <strong style="color:var(--slate-deep)">14 días gratis</strong> · sin tarjeta de crédito</div>
+
+    <ul class="price-features">
+      <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Platos y categorías ilimitadas</li>
+      <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Tu logo, color de marca y foto de portada</li>
+      <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>QR descargable en PNG y PDF imprimible</li>
+      <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Pedidos por WhatsApp con carrito armado</li>
+      <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Cambios en tiempo real desde tu celular</li>
+      <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>Soporte por WhatsApp en español</li>
+    </ul>
+
+    <button class="price-cta" onclick="document.querySelector('.qr-builder input').focus();window.scrollTo({top:0,behavior:'smooth'})">Empezar mis 14 días gratis</button>
+    <p class="price-note">Después: Gs. 40.000/mes · Pago por transferencia o QR local</p>
+  </div>
+</section>
+
+<!-- ── DEMO CTA ── -->
+<section class="demo-cta">
+  <div class="demo-cta-text">
+    <div class="section-eyebrow">Ver en acción</div>
+    <h2 class="section-title serif">Probá la <span class="accent">demo real</span> antes de crear tu cuenta.</h2>
+    <p>Es un menú vivo, con carrito, fotos y todo. Como lo vería tu cliente al escanear el QR de tu mesa.</p>
+    <a class="demo-cta-link" href="MenuQR.html">
+      Abrir la demo
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 17L17 7M7 7h10v10"/></svg>
+    </a>
+  </div>
+  <div class="demo-cta-visual">
+    <span class="comment"># Tu URL queda así</span><br/>
+    <span class="url">menuqr.py/<strong>tu-restaurante</strong></span><br/><br/>
+    <span class="comment"># Tu QR apunta acá</span><br/>
+    <span style="color:var(--ink)">⬛⬜⬛⬛⬜⬛⬛<br/>⬜⬛⬜⬜⬛⬜⬛<br/>⬛⬛⬜⬛⬜⬛⬜<br/>⬜⬛⬛⬜⬛⬛⬛</span>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="logo">
+    <img src="assets/menuqr-logo.png" alt="MenuQR" style="height:28px"/>
+  </div>
+  <div class="foot-links">
+    <a href="#como">Cómo funciona</a>
+    <a href="#funciones">Funciones</a>
+    <a href="#precio">Precio</a>
+    <a href="MenuQR.html">Demo</a>
+    <a href="https://wa.me/595981234567">WhatsApp</a>
+  </div>
+  <div class="foot-copy">© 2026 MenuQR · Asunción, Paraguay</div>
+</footer>
+
+</body>
+</html>
