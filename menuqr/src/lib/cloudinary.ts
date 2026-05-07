@@ -88,3 +88,13 @@ export function dishModalWithGravity(
     gravity: (gravity as GravityOption) ?? 'auto',
   })
 }
+
+/**
+ * Precarga una imagen en el cache del browser sin mostrarla.
+ * Llamar en hover/touchstart para que cuando abra el modal ya esté lista.
+ */
+export function preloadImage(url: string | null): void {
+  if (!url) return
+  const img = new Image()
+  img.src = url
+}

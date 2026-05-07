@@ -5,7 +5,7 @@ import { MOCK_MENU_DATA, formatPrice } from '../../lib/mock-data'
 import type { Item, MenuData } from '../../types'
 import { useCart } from '../../contexts/CartContext'
 import { MenuQRLogo } from '../../components/ui/MenuQRLogo'
-import { imgPresets, dishCardWithGravity, dishModalWithGravity } from '../../lib/cloudinary'
+import { imgPresets, dishCardWithGravity, dishModalWithGravity, preloadImage } from '../../lib/cloudinary'
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 
@@ -128,6 +128,16 @@ function DishCard({ dish, cartQuantity, onAdd, onIncrement, onDecrement, onClick
   return (
     <div
       onClick={() => dish.available && onClick(dish)}
+      onMouseEnter={() => {
+        if (dish.available) {
+          preloadImage(dishModalWithGravity(dish.image_url, dish.image_gravity))
+        }
+      }}
+      onTouchStart={() => {
+        if (dish.available) {
+          preloadImage(dishModalWithGravity(dish.image_url, dish.image_gravity))
+        }
+      }}
       className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-stone-100 transition-transform"
       style={{
         opacity: dish.available ? 1 : 0.72,
@@ -230,6 +240,7 @@ interface DishModalProps {
 
 function DishModal({ dish, whatsapp, cartQuantity, onAdd, onIncrement, onDecrement, onClose }: DishModalProps) {
   const [imgErr, setImgErr] = useState(false)
+  const [imgLoaded, setImgLoaded] = useState(false)
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
@@ -260,12 +271,23 @@ function DishModal({ dish, whatsapp, cartQuantity, onAdd, onIncrement, onDecreme
         {/* Photo */}
         <div className="relative mx-4 overflow-hidden rounded-2xl bg-stone-100" style={{ paddingBottom: '56%' }}>
           {!imgErr && dish.image_url ? (
-            <img
-              src={dishModalWithGravity(dish.image_url, dish.image_gravity) ?? dish.image_url}
-              alt={dish.name}
-              onError={() => setImgErr(true)}
-              className="absolute inset-0 h-full w-full object-cover"
-            />
+            <>
+              {!imgLoaded && (
+                <div className="absolute inset-0 animate-pulse bg-stone-200" />
+              )}
+              <img
+                src={dishModalWithGravity(dish.image_url, dish.image_gravity) ?? dish.image_url}
+                alt={dish.name}
+                onError={() => setImgErr(true)}
+                onLoad={() => setImgLoaded(true)}
+                className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
+                style={{
+                  backgroundImage: `url(${dishCardWithGravity(dish.image_url, dish.image_gravity) ?? ''})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                }}
+              />
+            </>
           ) : (
             <div className="absolute inset-0 flex items-center justify-center text-4xl text-stone-300">
               🍽️
@@ -588,6 +610,22 @@ export function MenuPage() {
       setActiveCategory(data.categories[0].id)
     }
   }, [data, activeCategory])
+
+  useEffect(() => {
+    if (!data) return
+    const activeCategoryData = data.categories.find(c => c.id === activeCategory)
+    if (!activeCategoryData) return
+
+    const timeout = setTimeout(() => {
+      activeCategoryData.items
+        .filter(item => item.available && item.image_url)
+        .forEach(item => {
+          preloadImage(dishModalWithGravity(item.image_url, item.image_gravity))
+        })
+    }, 500)
+
+    return () => clearTimeout(timeout)
+  }, [activeCategory, data])
 
   const scrollToCategory = (id: string) => {
     setActiveCategory(id)
