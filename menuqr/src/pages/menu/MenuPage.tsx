@@ -578,6 +578,16 @@ function MenuQRPromoSheet({ restaurantName, onClose }: MenuQRPromoSheetProps) {
 
 // ── Public MenuPage ───────────────────────────────────────────────────────────
 
+function setMetaProperty(property: string, content: string) {
+  let el = document.querySelector(`meta[property="${property}"]`)
+  if (!el) {
+    el = document.createElement('meta')
+    el.setAttribute('property', property)
+    document.head.appendChild(el)
+  }
+  el.setAttribute('content', content)
+}
+
 export function MenuPage() {
   const { slug } = useParams<{ slug: string }>()
 
@@ -593,6 +603,7 @@ export function MenuPage() {
   const [cartOpen, setCartOpen] = useState(false)
   const [promoOpen, setPromoOpen] = useState(false)
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  const pillsRef = useRef<HTMLDivElement>(null)
 
   const { add, increment, decrement, items: cartItems, count, total } = useCart()
 
@@ -605,11 +616,47 @@ export function MenuPage() {
     }
   }, [data?.business.primary_color])
 
+  // SEO meta tags
+  useEffect(() => {
+    if (!data) return
+    const { business } = data
+    document.title = `${business.name} | MenuQR`
+    setMetaProperty('og:title', business.name)
+    setMetaProperty('og:description', business.tagline ?? 'Mirá nuestro menú digital')
+    setMetaProperty('og:type', 'website')
+    if (business.cover_url) setMetaProperty('og:image', business.cover_url)
+    return () => { document.title = 'MenuQR' }
+  }, [data])
+
   useEffect(() => {
     if (data?.categories.length && !activeCategory) {
       setActiveCategory(data.categories[0].id)
     }
   }, [data, activeCategory])
+
+  // Scroll spy via IntersectionObserver
+  useEffect(() => {
+    if (!data) return
+    const observers: IntersectionObserver[] = []
+    data.categories.forEach((cat) => {
+      const el = sectionRefs.current[cat.id]
+      if (!el) return
+      const observer = new IntersectionObserver(
+        ([entry]) => { if (entry.isIntersecting) setActiveCategory(cat.id) },
+        { rootMargin: '-20% 0px -70% 0px', threshold: 0 }
+      )
+      observer.observe(el)
+      observers.push(observer)
+    })
+    return () => observers.forEach((o) => o.disconnect())
+  }, [data])
+
+  // Auto-scroll active pill into view
+  useEffect(() => {
+    if (!activeCategory) return
+    const pill = pillsRef.current?.querySelector(`[data-cat="${activeCategory}"]`)
+    pill?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+  }, [activeCategory])
 
   useEffect(() => {
     if (!data) return
@@ -729,10 +776,11 @@ export function MenuPage() {
 
       {/* Sticky category pills */}
       <div className="sticky top-0 z-10 border-b border-stone-100 bg-stone-50 pb-3 pt-3">
-        <div className="flex gap-2 overflow-x-auto px-4" style={{ scrollbarWidth: 'none' }}>
+        <div ref={pillsRef} className="flex gap-2 overflow-x-auto px-4" style={{ scrollbarWidth: 'none' }}>
           {categories.map((cat) => (
             <button
               key={cat.id}
+              data-cat={cat.id}
               onClick={() => scrollToCategory(cat.id)}
               className="flex-shrink-0 rounded-full px-4 py-1.5 text-sm font-semibold transition"
               style={{
