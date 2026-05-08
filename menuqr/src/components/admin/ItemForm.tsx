@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { Category, Item } from '../../types'
 import { useUpsertItem } from '../../lib/queries'
 import { ImageUpload } from './ImageUpload'
-import { dishCardWithGravity, optimizeImage } from '../../lib/cloudinary'
+import { dishCardWithGravity } from '../../lib/cloudinary'
 
 interface ItemFormProps {
   item: Item | null
@@ -72,7 +72,6 @@ function FocalPicker({ imageUrl, gravity, onChange }: FocalPickerProps) {
   }
 
   const pos = GRAVITY_POS[gravity]
-  const pickerSrc = optimizeImage(imageUrl, { width: 900, crop: 'fit' })
 
   return (
     <div
@@ -88,9 +87,9 @@ function FocalPicker({ imageUrl, gravity, onChange }: FocalPickerProps) {
       onPointerUp={() => { dragging.current = false }}
       onPointerCancel={() => { dragging.current = false }}
     >
-      {/* Full image (no crop) */}
+      {/* Full image — no Cloudinary crop transform, just show original */}
       <img
-        src={pickerSrc ?? imageUrl}
+        src={imageUrl}
         alt=""
         draggable={false}
         className="absolute inset-0 h-full w-full object-cover"
