@@ -747,7 +747,8 @@ export function MenuPage() {
         />
 
         {/* Logo + name overlay */}
-        <div className="absolute bottom-0 left-0 right-0 flex items-end gap-3 p-4">
+        <div className="absolute bottom-0 left-0 right-0">
+        <div className="mx-auto flex max-w-[960px] items-end gap-3 p-4 md:px-6">
           <div
             className="flex h-14 w-14 flex-shrink-0 overflow-hidden items-center justify-center rounded-2xl border-2 font-serif text-lg font-bold text-white"
             style={{ background: 'var(--brand-color)', borderColor: 'rgba(255,255,255,0.3)' }}
@@ -765,11 +766,13 @@ export function MenuPage() {
             )}
           </div>
         </div>
+        </div>
       </div>
 
       {/* Info bar */}
       {(business.hours || business.whatsapp) && (
-        <div className="flex items-center justify-between px-4 pt-2.5">
+        <div className="md:mx-auto md:max-w-[960px] md:px-6">
+        <div className="flex items-center justify-between px-4 pt-2.5 md:px-0">
           {business.hours && (
             <div className="flex items-center gap-1.5 text-[11.5px] text-stone-500">
               <ClockIcon />
@@ -788,6 +791,7 @@ export function MenuPage() {
               <WhatsAppIcon size={12} /> WhatsApp
             </a>
           )}
+        </div>
         </div>
       )}
 
