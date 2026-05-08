@@ -137,7 +137,7 @@ export function DashboardPage() {
       <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-3">
         <StatCard label="Platos" value={total} sub={`${available} disponibles`} />
         <StatCard label="Categorías" value={cats} sub="activas" />
-        <StatCard label="Estado" value="✓ Online" sub="QR activo" className="max-md:col-span-2 max-md:mx-auto max-md:w-[calc(50%-6px)]" />
+        <StatCard label="Estado" value="✓ Online" sub="QR activo" className="max-md:col-span-2" />
       </div>
 
       {/* Analytics shortcut */}
@@ -151,8 +151,8 @@ export function DashboardPage() {
         </button>
       </div>
 
-      {/* QR Panel */}
-      <div className="mb-6 rounded-2xl bg-white p-6 ring-1 ring-[#EEE9E2] shadow-[0_1px_3px_rgba(28,20,16,0.06)]">
+      {/* QR Panel — desktop only */}
+      <div className="mb-6 hidden md:block rounded-2xl bg-white p-6 ring-1 ring-[#EEE9E2] shadow-[0_1px_3px_rgba(28,20,16,0.06)]">
         <h3 className="mb-4 text-[13px] font-semibold uppercase tracking-[0.06em] text-[#8C7B6A]">Tu código QR</h3>
         <div className="flex flex-col items-start gap-5 md:flex-row md:items-center md:gap-6">
           <div className="rounded-xl border border-[#EEE9E2] p-3">
@@ -183,6 +183,16 @@ export function DashboardPage() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Mobile QR link */}
+      <div className="mb-6 flex justify-end md:hidden">
+        <button
+          onClick={() => navigate('/admin/qr')}
+          style={{ color: 'var(--brand-color)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 14 }}
+        >
+          Ver y descargar tu QR →
+        </button>
       </div>
 
       {/* Sold-out alert */}

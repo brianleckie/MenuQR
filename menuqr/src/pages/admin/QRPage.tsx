@@ -55,9 +55,9 @@ export function QRPage() {
       <h1 className="mb-6 font-serif text-2xl font-bold text-[#1C1410]">Tu QR y enlace</h1>
 
       <div className="rounded-2xl bg-white p-4 ring-1 ring-[#EEE9E2] shadow-[0_1px_3px_rgba(28,20,16,0.06)] md:p-8">
-        <div className="flex flex-wrap items-start gap-8 md:gap-10">
+        <div className="flex flex-col items-center gap-8 md:flex-row md:items-start md:gap-10">
           {/* QR display */}
-          <div className="rounded-xl border border-[#EEE9E2] p-3">
+          <div className="rounded-[12px] border border-[#EEE9E2] p-4">
             <QRCodeSVG
               value={qrUrl}
               size={180}
@@ -67,7 +67,7 @@ export function QRPage() {
           </div>
 
           {/* Info + actions */}
-          <div className="flex-1 min-w-0">
+          <div className="w-full min-w-0 md:flex-1">
             <h2 className="mb-2 font-serif text-xl font-bold text-stone-800">
               Descargá tu QR
             </h2>
@@ -79,8 +79,8 @@ export function QRPage() {
             <div className="mb-5 rounded-xl bg-stone-50 px-4 py-3">
               <p className="mb-1 text-xs text-stone-400">Enlace directo</p>
               <p
-                className="break-all font-mono text-sm"
-                style={{ color: 'var(--brand-color)' }}
+                className="font-mono"
+                style={{ color: 'var(--brand-color)', wordBreak: 'break-all', overflowWrap: 'anywhere', fontSize: 13 }}
               >
                 {qrUrl}
               </p>
@@ -88,7 +88,7 @@ export function QRPage() {
 
             <button
               onClick={handleDownload}
-              className="flex items-center gap-2 rounded-[10px] px-5 py-2.5 text-[13px] font-bold text-white shadow-[0_2px_8px_rgba(212,98,42,0.25)] transition hover:opacity-90"
+              className="flex w-full items-center justify-center gap-2 rounded-[10px] px-5 py-2.5 text-[13px] font-bold text-white shadow-[0_2px_8px_rgba(212,98,42,0.25)] transition hover:opacity-90 md:w-auto md:justify-start"
               style={{ background: 'var(--brand-color)' }}
             >
               ↓ Descargar PNG
