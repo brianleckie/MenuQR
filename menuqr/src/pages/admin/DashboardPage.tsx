@@ -138,6 +138,17 @@ export function DashboardPage() {
         <StatCard label="Estado" value="✓ Online" sub="QR activo" />
       </div>
 
+      {/* Analytics shortcut */}
+      <div className="mb-6 flex items-center justify-end">
+        <button
+          onClick={() => navigate('/admin/analytics')}
+          className="text-xs font-medium transition hover:underline"
+          style={{ color: 'var(--brand-color)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+        >
+          Ver analytics →
+        </button>
+      </div>
+
       {/* QR Panel */}
       <div className="mb-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-stone-100">
         <h3 className="mb-4 text-sm font-bold text-stone-800">Tu código QR</h3>

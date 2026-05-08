@@ -234,6 +234,48 @@
 .featureTitle { font-size: 17px; font-weight: 600; color: var(--mq-ink); margin-bottom: 6px; letter-spacing: -0.01em }
 .featureDesc { font-size: 14px; color: var(--mq-ink-soft); line-height: 1.6 }
 
+/* ── ANALYTICS ── */
+.analyticsSection {
+  padding: 96px 32px;
+  max-width: 1200px; margin: 0 auto;
+}
+.analyticsCols {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center;
+  max-width: 1100px; margin: 0 auto;
+}
+.analyticsFeatures { display: flex; flex-direction: column; gap: 28px }
+.analyticsFeature { display: flex; align-items: flex-start; gap: 16px }
+.analyticsFeatureIcon {
+  width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+  background: var(--mq-cream-soft); border: 1px solid var(--mq-line);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+}
+.analyticsFeatureTitle { font-size: 16px; font-weight: 600; color: var(--mq-ink); margin-bottom: 4px; letter-spacing: -0.01em }
+.analyticsFeatureDesc { font-size: 14px; color: var(--mq-ink-soft); line-height: 1.55 }
+.analyticsMockup { display: flex; justify-content: center }
+.analyticsMockupCard {
+  background: #fff; border: 1px solid var(--mq-line);
+  border-radius: 20px; padding: 24px; width: 100%; max-width: 340px;
+  box-shadow: 0 8px 32px -8px rgba(74,95,114,0.14);
+}
+.analyticsMockupHeader { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 20px }
+.analyticsMockupTitle { font-size: 16px; font-weight: 700; color: var(--mq-ink) }
+.analyticsMockupSub { font-size: 11px; color: var(--mq-ink-soft) }
+.analyticsMockupStats { display: flex; gap: 12px; margin-bottom: 20px }
+.analyticsStat {
+  flex: 1; background: var(--mq-cream-soft); border-radius: 12px;
+  padding: 12px; text-align: center;
+}
+.analyticsStatNum { font-size: 20px; font-weight: 700; color: var(--mq-slate-deep); line-height: 1.1; margin-bottom: 4px }
+.analyticsStatLabel { font-size: 10px; color: var(--mq-ink-soft) }
+.analyticsMiniChart {
+  display: flex; align-items: flex-end; gap: 6px; height: 60px; padding: 0 4px;
+}
+.analyticsMiniBar {
+  flex: 1; background: var(--mq-slate); opacity: 0.35; border-radius: 3px;
+}
+
 /* ── PRICING ── */
 .pricingSection {
   background: var(--mq-cream-soft); border-top: 1px solid var(--mq-line); padding: 96px 32px;
@@ -312,6 +354,7 @@
   .steps { grid-template-columns: 1fr }
   .featuresGrid { grid-template-columns: 1fr 1fr }
   .demoCta { grid-template-columns: 1fr }
+  .analyticsCols { grid-template-columns: 1fr }
 }
 @media (max-width: 560px) {
   .nav { padding: 12px 18px }

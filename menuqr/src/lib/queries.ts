@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from './supabase'
-import type { Business, Category, Item, MenuData } from '../types'
+import type { Business, Category, Item, MenuData, AnalyticsSummary } from '../types'
 
 // ── Query keys ────────────────────────────────────────────────────────────────
 export const qk = {
@@ -10,6 +10,7 @@ export const qk = {
   categories:     (bId: string)  => ['categories', bId] as const,
   items:          (bId: string)  => ['items', bId] as const,
   menuData:       (slug: string) => ['menuData', slug] as const,
+  analytics:      (businessId: string) => ['analytics', businessId] as const,
 }
 
 // ── Business ──────────────────────────────────────────────────────────────────
@@ -327,6 +328,24 @@ export function useReorderItems() {
   })
 }
 
+// ── TRACK (fire-and-forget, nunca lanzan error al usuario) ──────
+
+export async function trackPageView(businessId: string, slug: string) {
+  if (!supabase) return
+  const device = window.innerWidth < 768 ? 'mobile' : 'desktop'
+  await supabase.from('page_views').insert({ business_id: businessId, slug, device })
+}
+
+export async function trackItemView(businessId: string, itemId: string) {
+  if (!supabase) return
+  await supabase.from('item_views').insert({ business_id: businessId, item_id: itemId })
+}
+
+export async function trackWhatsappClick(businessId: string, itemId: string | null) {
+  if (!supabase) return
+  await supabase.from('whatsapp_clicks').insert({ business_id: businessId, item_id: itemId })
+}
+
 // ── Public menu (denormalizado) ───────────────────────────────────────────────
 
 export function useMenuData(slug: string) {
@@ -359,6 +378,94 @@ export function useMenuData(slug: string) {
       return {
         business: business as Business,
         categories: enriched,
+      }
+    },
+  })
+}
+
+// ── READ Analytics ───────────────────────────────────────────────────────────
+
+export function useAnalytics(businessId: string | undefined) {
+  return useQuery({
+    queryKey: qk.analytics(businessId ?? ''),
+    enabled: !!businessId,
+    staleTime: 1000 * 60 * 5,
+    queryFn: async (): Promise<AnalyticsSummary> => {
+      if (!supabase || !businessId) throw new Error('no supabase')
+
+      const now = new Date()
+      const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString()
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+
+      const [pvAll, pvToday, pvWeek, pvMonth, waAll, waWeek, itemViewsRaw, waItemsRaw, pvDays] =
+        await Promise.all([
+          supabase.from('page_views').select('id', { count: 'exact', head: true }).eq('business_id', businessId),
+          supabase.from('page_views').select('id', { count: 'exact', head: true }).eq('business_id', businessId).gte('viewed_at', startOfToday),
+          supabase.from('page_views').select('id', { count: 'exact', head: true }).eq('business_id', businessId).gte('viewed_at', sevenDaysAgo),
+          supabase.from('page_views').select('id', { count: 'exact', head: true }).eq('business_id', businessId).gte('viewed_at', thirtyDaysAgo),
+          supabase.from('whatsapp_clicks').select('id', { count: 'exact', head: true }).eq('business_id', businessId),
+          supabase.from('whatsapp_clicks').select('id', { count: 'exact', head: true }).eq('business_id', businessId).gte('clicked_at', sevenDaysAgo),
+          supabase.from('item_views').select('item_id').eq('business_id', businessId).gte('viewed_at', thirtyDaysAgo),
+          supabase.from('whatsapp_clicks').select('item_id').eq('business_id', businessId).gte('clicked_at', thirtyDaysAgo),
+          supabase.from('page_views').select('viewed_at, device').eq('business_id', businessId).gte('viewed_at', sevenDaysAgo),
+        ])
+
+      const viewCount: Record<string, number> = {}
+      for (const v of itemViewsRaw.data ?? []) {
+        if (v.item_id) viewCount[v.item_id] = (viewCount[v.item_id] ?? 0) + 1
+      }
+      const waCount: Record<string, number> = {}
+      for (const w of waItemsRaw.data ?? []) {
+        if (w.item_id) waCount[w.item_id] = (waCount[w.item_id] ?? 0) + 1
+      }
+
+      const topItemIds = Object.entries(viewCount)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([id]) => id)
+
+      const { data: itemsData } = topItemIds.length
+        ? await supabase.from('items').select('id, name, image_url').in('id', topItemIds)
+        : { data: [] }
+
+      const topItems = topItemIds.map(id => ({
+        item_id: id,
+        name: itemsData?.find(i => i.id === id)?.name ?? 'Plato eliminado',
+        image_url: itemsData?.find(i => i.id === id)?.image_url ?? null,
+        views: viewCount[id] ?? 0,
+        whatsapp_clicks: waCount[id] ?? 0,
+      }))
+
+      const dayMap: Record<string, number> = {}
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000)
+        dayMap[d.toISOString().slice(0, 10)] = 0
+      }
+      for (const pv of pvDays.data ?? []) {
+        const day = (pv.viewed_at as string).slice(0, 10)
+        if (day in dayMap) dayMap[day]++
+      }
+      const visitsByDay = Object.entries(dayMap).map(([date, visits]) => ({ date, visits }))
+
+      const allPvs = pvDays.data ?? []
+      const mobileCount = allPvs.filter(p => p.device === 'mobile').length
+      const desktopCount = allPvs.filter(p => p.device === 'desktop').length
+
+      const visitsWeek = pvWeek.count ?? 0
+      const waThisWeek = waWeek.count ?? 0
+
+      return {
+        totalVisits: pvAll.count ?? 0,
+        visitsToday: pvToday.count ?? 0,
+        visitsThisWeek: visitsWeek,
+        visitsThisMonth: pvMonth.count ?? 0,
+        whatsappTotal: waAll.count ?? 0,
+        whatsappThisWeek: waThisWeek,
+        conversionRate: visitsWeek > 0 ? Math.round((waThisWeek / visitsWeek) * 100) : 0,
+        topItems,
+        visitsByDay,
+        deviceSplit: { mobile: mobileCount, desktop: desktopCount },
       }
     },
   })

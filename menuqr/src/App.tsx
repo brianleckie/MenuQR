@@ -10,6 +10,7 @@ import { MenuItemsPage } from './pages/admin/MenuPage'
 import { CategoriesPage } from './pages/admin/CategoriesPage'
 import { QRPage } from './pages/admin/QRPage'
 import { SettingsPage } from './pages/admin/SettingsPage'
+import { AnalyticsPage } from './pages/admin/AnalyticsPage'
 import { MenuPage } from './pages/menu/MenuPage'
 import { LandingPage } from './pages/LandingPage'
 
@@ -40,6 +41,7 @@ export default function App() {
                 <Route index element={<DashboardPage />} />
                 <Route path="menu" element={<MenuItemsPage />} />
                 <Route path="categories" element={<CategoriesPage />} />
+                <Route path="analytics" element={<AnalyticsPage />} />
                 <Route path="qr" element={<QRPage />} />
                 <Route path="settings" element={<SettingsPage />} />
               </Route>
