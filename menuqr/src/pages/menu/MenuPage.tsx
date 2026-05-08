@@ -500,7 +500,7 @@ interface MenuQRPromoSheetProps {
 
 function MenuQRPromoSheet({ restaurantName, onClose }: MenuQRPromoSheetProps) {
   const contactWhatsapp =
-    import.meta.env.VITE_CONTACT_WHATSAPP ?? '595991234567'
+    import.meta.env.VITE_CONTACT_WHATSAPP ?? '595983763890'
 
   const message = `Hola! Vi el menú de ${restaurantName} y me interesa tener un menú digital para mi negocio. ¿Pueden darme más info?`
   const contactUrl = `https://wa.me/${contactWhatsapp}?text=${encodeURIComponent(message)}`
