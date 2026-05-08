@@ -145,7 +145,7 @@ function DishCard({ dish, cartQuantity, onAdd, onIncrement, onDecrement, onClick
       }}
     >
       {/* Photo */}
-      <div className="relative overflow-hidden bg-stone-100" style={{ paddingBottom: '66.67%' }}>
+      <div className="relative aspect-[3/2] overflow-hidden bg-stone-100 md:aspect-[5/3]">
         {!imgErr && dish.image_url ? (
           <img
             src={dishCardWithGravity(dish.image_url, dish.image_gravity) ?? dish.image_url}
@@ -730,7 +730,7 @@ export function MenuPage() {
   return (
     <div className="min-h-screen bg-stone-50 font-sans">
       {/* Cover */}
-      <div className="relative" style={{ height: 180, background: '#2A1810', overflow: 'hidden' }}>
+      <div className="relative h-[180px] md:h-[220px]" style={{ background: '#2A1810', overflow: 'hidden' }}>
         {business.cover_url ? (
           <img
             src={imgPresets.cover(business.cover_url) ?? business.cover_url}
@@ -793,7 +793,7 @@ export function MenuPage() {
 
       {/* Sticky category pills */}
       <div className="sticky top-0 z-10 border-b border-stone-100 bg-stone-50 pb-3 pt-3">
-        <div ref={pillsRef} className="flex gap-2 overflow-x-auto px-4" style={{ scrollbarWidth: 'none' }}>
+        <div ref={pillsRef} className="flex gap-2 overflow-x-auto px-4 md:justify-center" style={{ scrollbarWidth: 'none' }}>
           {categories.map((cat) => (
             <button
               key={cat.id}
@@ -812,7 +812,7 @@ export function MenuPage() {
       </div>
 
       {/* Category sections */}
-      <div className="px-4 pb-32 pt-2">
+      <div className="px-4 pb-32 pt-2 md:mx-auto md:max-w-[960px] md:px-6">
         {categories.map((cat) => (
           <div
             key={cat.id}
@@ -823,7 +823,7 @@ export function MenuPage() {
               {cat.name}
               <span className="h-px flex-1 bg-stone-200" />
             </h2>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
               {cat.items.map((dish) => (
                 <DishCard
                   key={dish.id}

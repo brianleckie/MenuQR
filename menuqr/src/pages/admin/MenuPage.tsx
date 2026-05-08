@@ -177,10 +177,10 @@ export function MenuItemsPage() {
   return (
     <div className="p-4 md:p-8">
       <div className="mb-5 flex items-center justify-between">
-        <h1 className="font-serif text-2xl font-bold text-stone-800">Platos</h1>
+        <h1 className="font-serif text-2xl font-bold text-[#1C1410]">Platos</h1>
         <button
           onClick={() => setDrawerItem(null)}
-          className="flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-bold text-white"
+          className="flex items-center gap-1.5 rounded-[10px] px-4 py-2 text-[13px] font-bold text-white shadow-[0_2px_8px_rgba(212,98,42,0.25)]"
           style={{ background: 'var(--brand-color)' }}
         >
           + Nuevo plato
@@ -208,7 +208,7 @@ export function MenuItemsPage() {
       )}
 
       {cats.length === 0 && (
-        <div className="rounded-2xl bg-white py-10 text-center shadow-sm ring-1 ring-stone-100">
+        <div className="rounded-2xl bg-white py-10 text-center ring-1 ring-[#EEE9E2] shadow-[0_1px_3px_rgba(28,20,16,0.06)]">
           <p className="mb-3 text-sm text-stone-400">No hay categorías. Crealas primero.</p>
           <button
             onClick={() => navigate('/admin/categories')}
@@ -235,7 +235,7 @@ export function MenuItemsPage() {
                   {localItems.map(dish => (
                     <SortableItem key={dish.id} id={dish.id}>
                       {(dragHandleProps) => (
-                        <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-stone-100">
+                        <div className="rounded-2xl bg-white p-4 ring-1 ring-[#EEE9E2] shadow-[0_1px_3px_rgba(28,20,16,0.06)]">
                           <div className="flex gap-3">
                             <DragHandle {...dragHandleProps} />
                             <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl bg-stone-100">
@@ -296,7 +296,7 @@ export function MenuItemsPage() {
 
           {/* Desktop table */}
           {cats.length > 0 && (
-            <div className="hidden overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-stone-100 md:block">
+            <div className="hidden overflow-hidden rounded-2xl bg-white ring-1 ring-[#EEE9E2] shadow-[0_1px_3px_rgba(28,20,16,0.06)] md:block">
               {localItems.length === 0 ? (
                 <div className="py-10 text-center text-sm text-stone-400">
                   No hay platos en esta categoría aún.
@@ -321,12 +321,12 @@ export function MenuItemsPage() {
                       <SortableTableRow key={dish.id} id={dish.id} index={i} total={localItems.length}>
                         {(dragHandleProps) => (
                           <>
-                            <td className="px-3 py-3">
+                            <td className="px-3 py-[10px]">
                               <DragHandle {...dragHandleProps} />
                             </td>
-                            <td className="px-4 py-3">
+                            <td className="px-4 py-[10px]">
                               <div className="flex items-center gap-3">
-                                <div className="h-[34px] w-[46px] flex-shrink-0 overflow-hidden rounded-lg bg-stone-100">
+                                <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-[10px] bg-stone-100">
                                   {dish.image_url && (
                                     <img
                                       src={imgPresets.adminThumb(dish.image_url) ?? dish.image_url}
@@ -337,36 +337,31 @@ export function MenuItemsPage() {
                                   )}
                                 </div>
                                 <div>
-                                  <p className="font-serif text-sm font-semibold text-stone-800">{dish.name}</p>
+                                  <p className="font-serif text-[13.5px] font-semibold text-stone-800">{dish.name}</p>
                                   {dish.short_desc && (
                                     <p className="text-xs text-stone-400">{dish.short_desc}</p>
                                   )}
                                 </div>
                               </div>
                             </td>
-                            <td className="whitespace-nowrap px-4 py-3 text-sm font-bold" style={{ color: 'var(--brand-color)' }}>
+                            <td className="whitespace-nowrap px-4 py-[10px] text-sm font-bold" style={{ color: 'var(--brand-color)' }}>
                               {formatPrice(dish.price)}
                             </td>
-                            <td className="px-4 py-3">
-                              <div className="flex items-center gap-2">
-                                <Toggle checked={dish.available} onChange={() => handleToggle(dish)} />
-                                <span className="text-xs font-semibold" style={{ color: dish.available ? '#4A8A4A' : '#9E9E9E' }}>
-                                  {dish.available ? 'Disponible' : 'Agotado'}
-                                </span>
-                              </div>
+                            <td className="px-4 py-[10px]">
+                              <Toggle checked={dish.available} onChange={() => handleToggle(dish)} />
                             </td>
-                            <td className="px-4 py-3">
+                            <td className="px-4 py-[10px]">
                               <div className="flex gap-1">
                                 <button
                                   onClick={() => setDrawerItem(dish)}
-                                  className="flex h-8 w-8 items-center justify-center rounded-lg bg-stone-100 text-stone-600 transition hover:bg-stone-200"
+                                  className="flex h-7 w-7 items-center justify-center rounded-md bg-stone-100 text-[13px] text-stone-600 transition hover:bg-stone-200"
                                   title="Editar"
                                 >
                                   ✏️
                                 </button>
                                 <button
                                   onClick={() => handleDelete(dish)}
-                                  className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-50 text-red-500 transition hover:bg-red-100"
+                                  className="flex h-7 w-7 items-center justify-center rounded-md bg-red-50 text-[13px] text-red-500 transition hover:bg-red-100"
                                   title="Eliminar"
                                 >
                                   🗑

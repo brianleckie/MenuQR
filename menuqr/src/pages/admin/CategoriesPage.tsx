@@ -155,14 +155,14 @@ export function CategoriesPage() {
     <div className="p-4 md:p-8">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="font-serif text-2xl font-bold text-stone-800">Categorías</h1>
+          <h1 className="font-serif text-2xl font-bold text-[#1C1410]">Categorías</h1>
           <p className="mt-1 text-sm text-stone-500">
             {localCategories.length} sección{localCategories.length !== 1 ? 'es' : ''} en tu menú
           </p>
         </div>
         <button
           onClick={startAddNew}
-          className="flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-bold text-white"
+          className="flex items-center gap-1.5 rounded-[10px] px-4 py-2 text-[13px] font-bold text-white shadow-[0_2px_8px_rgba(212,98,42,0.25)]"
           style={{ background: 'var(--brand-color)' }}
         >
           + Nueva categoría
@@ -183,7 +183,7 @@ export function CategoriesPage() {
               return (
                 <SortableItem key={cat.id} id={cat.id}>
                   {(dragHandleProps) => (
-                    <div className="flex items-center justify-between rounded-2xl bg-white px-4 py-4 shadow-sm ring-1 ring-stone-100">
+                    <div className="flex items-center justify-between rounded-2xl bg-white px-4 py-4 ring-1 ring-[#EEE9E2] shadow-[0_1px_3px_rgba(28,20,16,0.06)]">
                       <div className="flex items-center gap-3 min-w-0 flex-1">
                         <DragHandle {...dragHandleProps} />
                         <div
@@ -263,7 +263,7 @@ export function CategoriesPage() {
             )}
 
             {localCategories.length === 0 && !addingNew && (
-              <div className="rounded-2xl bg-white py-10 text-center shadow-sm ring-1 ring-stone-100">
+              <div className="rounded-2xl bg-white py-10 text-center ring-1 ring-[#EEE9E2] shadow-[0_1px_3px_rgba(28,20,16,0.06)]">
                 <p className="text-sm text-stone-400">
                   No hay categorías aún. Crea la primera para organizar tu menú.
                 </p>

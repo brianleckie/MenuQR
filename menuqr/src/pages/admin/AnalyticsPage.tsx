@@ -14,10 +14,10 @@ function dayLabel(dateStr: string) {
 
 function StatCard({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
-    <div style={{ background: '#fff', borderRadius: 14, padding: '20px 22px', boxShadow: '0 1px 4px rgba(0,0,0,0.06)', flex: 1, minWidth: 0 }}>
-      <p style={{ fontSize: 11, fontWeight: 500, color: '#9E9E9E', marginBottom: 4 }}>{label}</p>
-      <p style={{ fontFamily: 'Lora, Georgia, serif', fontSize: 26, fontWeight: 700, color: '#1C1410', lineHeight: 1.1 }}>{value}</p>
-      {sub && <p style={{ fontSize: 11, color: '#9E9E9E', marginTop: 4 }}>{sub}</p>}
+    <div style={{ background: '#fff', borderRadius: 16, padding: 24, border: '1px solid #EEE9E2', boxShadow: '0 1px 3px rgba(28,20,16,0.06)', flex: 1, minWidth: 0 }}>
+      <p style={{ fontSize: 11, fontWeight: 600, color: '#8C7B6A', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 4 }}>{label}</p>
+      <p style={{ fontFamily: 'Lora, Georgia, serif', fontSize: 28, fontWeight: 700, color: '#1C1410', lineHeight: 1 }}>{value}</p>
+      {sub && <p style={{ fontSize: 12, color: '#B09A88', marginTop: 4 }}>{sub}</p>}
     </div>
   )
 }
@@ -114,7 +114,7 @@ export function AnalyticsPage() {
       </div>
 
       {isEmpty ? (
-        <div style={{ background: '#fff', borderRadius: 14, padding: '48px 32px', textAlign: 'center', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+        <div style={{ background: '#fff', borderRadius: 16, padding: '48px 32px', textAlign: 'center', border: '1px solid #EEE9E2', boxShadow: '0 1px 3px rgba(28,20,16,0.06)' }}>
           <p style={{ fontSize: 40, marginBottom: 16 }}>📊</p>
           <p style={{ fontSize: 16, fontWeight: 600, color: '#1C1410', marginBottom: 8 }}>Todavía no hay visitas registradas.</p>
           <p style={{ fontSize: 14, color: '#9E9E9E' }}>Compartí tu menú para empezar a ver datos aquí.</p>
@@ -134,8 +134,8 @@ export function AnalyticsPage() {
           </div>
 
           {/* Row 2 — Visits chart */}
-          <div style={{ background: '#fff', borderRadius: 14, padding: '22px 24px', boxShadow: '0 1px 4px rgba(0,0,0,0.06)', marginBottom: 20 }}>
-            <p style={{ fontSize: 13, fontWeight: 600, color: '#5A4A3A', marginBottom: 16 }}>Visitas últimos 7 días</p>
+          <div style={{ background: '#fff', borderRadius: 16, padding: 24, border: '1px solid #EEE9E2', boxShadow: '0 1px 3px rgba(28,20,16,0.06)', marginBottom: 20 }}>
+            <p style={{ fontSize: 11, fontWeight: 600, color: '#8C7B6A', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 16 }}>Visitas últimos 7 días</p>
             <VisitsChart data={data.visitsByDay} />
           </div>
 
@@ -143,8 +143,8 @@ export function AnalyticsPage() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
 
             {/* Top items */}
-            <div style={{ background: '#fff', borderRadius: 14, padding: '22px 24px', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-              <p style={{ fontSize: 13, fontWeight: 600, color: '#5A4A3A', marginBottom: 16 }}>Top 5 platos más vistos</p>
+            <div style={{ background: '#fff', borderRadius: 16, padding: 24, border: '1px solid #EEE9E2', boxShadow: '0 1px 3px rgba(28,20,16,0.06)' }}>
+              <p style={{ fontSize: 11, fontWeight: 600, color: '#8C7B6A', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 16 }}>Top 5 platos más vistos</p>
               {data.topItems.length > 0 ? (
                 <TopItems items={data.topItems} />
               ) : (
@@ -152,36 +152,31 @@ export function AnalyticsPage() {
               )}
             </div>
 
-            {/* Device split + conversion */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div style={{ background: '#fff', borderRadius: 14, padding: '22px 24px', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-                <p style={{ fontSize: 13, fontWeight: 600, color: '#5A4A3A', marginBottom: 16 }}>Dispositivos</p>
-                {(() => {
-                  const total = data.deviceSplit.mobile + data.deviceSplit.desktop
-                  const mobilePct = total > 0 ? Math.round((data.deviceSplit.mobile / total) * 100) : 0
-                  const desktopPct = total > 0 ? 100 - mobilePct : 0
-                  return (
-                    <div style={{ display: 'flex', gap: 24 }}>
-                      <div style={{ textAlign: 'center' }}>
-                        <p style={{ fontSize: 28 }}>📱</p>
-                        <p style={{ fontFamily: 'Lora, Georgia, serif', fontSize: 24, fontWeight: 700, color: '#1C1410' }}>{mobilePct}%</p>
-                        <p style={{ fontSize: 11, color: '#9E9E9E' }}>Mobile</p>
-                      </div>
-                      <div style={{ textAlign: 'center' }}>
-                        <p style={{ fontSize: 28 }}>💻</p>
-                        <p style={{ fontFamily: 'Lora, Georgia, serif', fontSize: 24, fontWeight: 700, color: '#1C1410' }}>{desktopPct}%</p>
-                        <p style={{ fontSize: 11, color: '#9E9E9E' }}>Desktop</p>
-                      </div>
-                    </div>
-                  )
-                })()}
-              </div>
-
-              <div style={{ background: '#fff', borderRadius: 14, padding: '22px 24px', boxShadow: '0 1px 4px rgba(0,0,0,0.06)', flex: 1 }}>
-                <p style={{ fontSize: 13, fontWeight: 600, color: '#5A4A3A', marginBottom: 8 }}>Conversión</p>
-                <p style={{ fontFamily: 'Lora, Georgia, serif', fontSize: 36, fontWeight: 700, color: 'var(--brand-color, #D4622A)', marginBottom: 6 }}>{data.conversionRate}%</p>
-                <p style={{ fontSize: 13, color: '#9E9E9E', lineHeight: 1.5 }}>
-                  De cada 100 visitantes, {data.conversionRate} te contactaron por WhatsApp
+            {/* Conversion */}
+            <div style={{ background: '#fff', borderRadius: 16, padding: 24, border: '1px solid #EEE9E2', boxShadow: '0 1px 3px rgba(28,20,16,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ textAlign: 'center', padding: '20px 0' }}>
+                <p style={{
+                  fontSize: 11,
+                  fontWeight: 600,
+                  color: '#8C7B6A',
+                  letterSpacing: '0.06em',
+                  textTransform: 'uppercase',
+                  marginBottom: 8,
+                }}>
+                  Tasa de contacto
+                </p>
+                <p style={{
+                  fontFamily: 'Lora, serif',
+                  fontSize: 36,
+                  fontWeight: 700,
+                  color: '#1C1410',
+                  lineHeight: 1,
+                  marginBottom: 6,
+                }}>
+                  {data.conversionRate > 0 ? `${data.conversionRate}%` : '—'}
+                </p>
+                <p style={{ fontSize: 12, color: '#B09A88' }}>
+                  de visitantes te escribieron por WhatsApp
                 </p>
               </div>
             </div>

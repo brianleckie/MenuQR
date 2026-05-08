@@ -101,7 +101,7 @@ export function AdminLayout() {
   return (
     <div className="flex h-screen bg-stone-100 font-sans">
       {/* ── Sidebar (desktop) ──────────────────────────────────────────── */}
-      <aside className="hidden w-56 flex-col bg-stone-900 text-white md:flex">
+      <aside className="hidden w-[200px] flex-col bg-stone-900 text-white md:flex">
         {/* Brand */}
         <div className="border-b border-white/10 px-5 py-5">
           <MenuQRLogo size={28} showText className="text-white" />
@@ -117,9 +117,9 @@ export function AdminLayout() {
               end={end}
               className={({ isActive }) =>
                 [
-                  'flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition',
+                  'flex items-center gap-2 rounded-lg px-[10px] py-2 text-[13px] font-medium transition',
                   isActive
-                    ? 'bg-white/10 text-white'
+                    ? 'bg-[rgba(212,98,42,0.12)] text-white'
                     : 'text-white/50 hover:text-white/80',
                 ].join(' ')
               }
