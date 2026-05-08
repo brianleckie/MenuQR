@@ -64,4 +64,51 @@ export interface AuthUser {
 /** Generic API / mutation result */
 export type MutationResult<T> =
   | { data: T; error: null }
-  | { data: null; error: string };
+  | { data: null; error: string }
+
+export interface PageView {
+  id: string
+  business_id: string
+  slug: string
+  device: 'mobile' | 'desktop'
+  viewed_at: string
+}
+
+export interface ItemView {
+  id: string
+  business_id: string
+  item_id: string
+  viewed_at: string
+}
+
+export interface WhatsappClick {
+  id: string
+  business_id: string
+  item_id: string | null
+  clicked_at: string
+}
+
+export interface AnalyticsSummary {
+  totalVisits: number
+  visitsToday: number
+  visitsThisWeek: number
+  visitsThisMonth: number
+  whatsappTotal: number
+  whatsappThisWeek: number
+  conversionRate: number
+  topItems: {
+    item_id: string
+    name: string
+    image_url: string | null
+    views: number
+    whatsapp_clicks: number
+  }[]
+  visitsByDay: {
+    date: string
+    visits: number
+  }[]
+  deviceSplit: {
+    mobile: number
+    desktop: number
+  }
+};

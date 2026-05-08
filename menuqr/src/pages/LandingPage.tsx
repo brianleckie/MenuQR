@@ -431,6 +431,76 @@ export function LandingPage() {
         </div>
       </section>
 
+      {/* ── ANALYTICS ── */}
+      <section className={styles.analyticsSection} id="analytics">
+        <div className={styles.sectionHead}>
+          <div className={styles.sectionEyebrow}>Analytics</div>
+          <h2 className={`${styles.sectionTitle} ${styles.serif}`}>
+            Sabé exactamente <span className={styles.accent}>qué funciona</span> en tu menú
+          </h2>
+          <p className={styles.sectionSub}>
+            Mirá cuánta gente visita tu menú, qué platos ven más y cuántos te contactaron por WhatsApp. Todo en tu panel.
+          </p>
+        </div>
+
+        <div className={styles.analyticsCols}>
+          {/* Features */}
+          <div className={styles.analyticsFeatures}>
+            <div className={styles.analyticsFeature}>
+              <div className={styles.analyticsFeatureIcon}>👁</div>
+              <div>
+                <div className={styles.analyticsFeatureTitle}>Visitas en tiempo real</div>
+                <div className={styles.analyticsFeatureDesc}>Cuánta gente entró a tu menú hoy, esta semana y este mes.</div>
+              </div>
+            </div>
+            <div className={styles.analyticsFeature}>
+              <div className={styles.analyticsFeatureIcon}>🍽</div>
+              <div>
+                <div className={styles.analyticsFeatureTitle}>Platos más vistos</div>
+                <div className={styles.analyticsFeatureDesc}>Sabés qué le llama la atención a tus clientes antes de que pidan.</div>
+              </div>
+            </div>
+            <div className={styles.analyticsFeature}>
+              <div className={styles.analyticsFeatureIcon}>💬</div>
+              <div>
+                <div className={styles.analyticsFeatureTitle}>Clicks a WhatsApp</div>
+                <div className={styles.analyticsFeatureDesc}>Cuántos visitantes pasaron a la acción y te contactaron.</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Mockup */}
+          <div className={styles.analyticsMockup}>
+            <div className={styles.analyticsMockupCard}>
+              <div className={styles.analyticsMockupHeader}>
+                <span className={styles.analyticsMockupTitle}>Analytics</span>
+                <span className={styles.analyticsMockupSub}>Últimos 30 días</span>
+              </div>
+              <div className={styles.analyticsMockupStats}>
+                <div className={styles.analyticsStat}>
+                  <div className={styles.analyticsStatNum}>847</div>
+                  <div className={styles.analyticsStatLabel}>visitas este mes</div>
+                </div>
+                <div className={styles.analyticsStat}>
+                  <div className={styles.analyticsStatNum}>23%</div>
+                  <div className={styles.analyticsStatLabel}>conversión</div>
+                </div>
+                <div className={styles.analyticsStat}>
+                  <div className={styles.analyticsStatNum}>5</div>
+                  <div className={styles.analyticsStatLabel}>platos top</div>
+                </div>
+              </div>
+              {/* Mini bar chart */}
+              <div className={styles.analyticsMiniChart}>
+                {[40, 65, 50, 80, 55, 95, 70].map((h, i) => (
+                  <div key={i} className={styles.analyticsMiniBar} style={{ height: h * 0.6 }} />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── PRECIO ── */}
       <section className={styles.pricingSection} id="precio">
         <div className={styles.sectionHead}>

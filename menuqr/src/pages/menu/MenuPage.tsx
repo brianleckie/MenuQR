@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom'
 import { useEffect, useState, useRef } from 'react'
-import { useMenuData } from '../../lib/queries'
+import { useMenuData, trackPageView, trackItemView, trackWhatsappClick } from '../../lib/queries'
 import { MOCK_MENU_DATA, formatPrice } from '../../lib/mock-data'
 import type { Item, MenuData } from '../../types'
 import { useCart } from '../../contexts/CartContext'
@@ -236,9 +236,10 @@ interface DishModalProps {
   onIncrement: () => void
   onDecrement: () => void
   onClose: () => void
+  onWhatsappClick?: () => void
 }
 
-function DishModal({ dish, whatsapp, cartQuantity, onAdd, onIncrement, onDecrement, onClose }: DishModalProps) {
+function DishModal({ dish, whatsapp, cartQuantity, onAdd, onIncrement, onDecrement, onClose, onWhatsappClick }: DishModalProps) {
   const [imgErr, setImgErr] = useState(false)
   const [imgLoaded, setImgLoaded] = useState(false)
 
@@ -359,6 +360,7 @@ function DishModal({ dish, whatsapp, cartQuantity, onAdd, onIncrement, onDecreme
                     href={waUrl}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={onWhatsappClick}
                     className="flex items-center gap-1.5 text-xs text-stone-400 no-underline transition hover:text-stone-600"
                   >
                     <WhatsAppIcon size={12} />
@@ -674,10 +676,24 @@ export function MenuPage() {
     return () => clearTimeout(timeout)
   }, [activeCategory, data])
 
+  // Track page view on mount (fire-and-forget)
+  useEffect(() => {
+    if (data?.business?.id) {
+      trackPageView(data.business.id, slug ?? '')
+    }
+  }, [data?.business?.id, slug])
+
   const scrollToCategory = (id: string) => {
     setActiveCategory(id)
     const el = sectionRefs.current[id]
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
+  const handleDishClick = (dish: Item) => {
+    setSelectedDish(dish)
+    if (data?.business?.id) {
+      trackItemView(data.business.id, dish.id)
+    }
   }
 
   function getCartQuantity(dishId: string) {
@@ -765,6 +781,7 @@ export function MenuPage() {
               href={`https://wa.me/${business.whatsapp}`}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() => trackWhatsappClick(business.id, null)}
               className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold text-white no-underline"
               style={{ background: '#25D366' }}
             >
@@ -815,7 +832,7 @@ export function MenuPage() {
                   onAdd={() => add({ id: dish.id, name: dish.name, price: dish.price, image_url: dish.image_url })}
                   onIncrement={() => increment(dish.id)}
                   onDecrement={() => decrement(dish.id)}
-                  onClick={setSelectedDish}
+                  onClick={handleDishClick}
                 />
               ))}
             </div>
@@ -853,6 +870,7 @@ export function MenuPage() {
             href={`https://wa.me/${business.whatsapp}`}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => trackWhatsappClick(business.id, null)}
             className="fixed bottom-5 right-5 z-30 flex h-14 w-14 items-center justify-center rounded-full text-white shadow-lg transition hover:scale-105"
             style={{ background: '#25D366' }}
             aria-label="Contactar por WhatsApp"
@@ -872,6 +890,7 @@ export function MenuPage() {
           onIncrement={() => increment(selectedDish.id)}
           onDecrement={() => decrement(selectedDish.id)}
           onClose={() => setSelectedDish(null)}
+          onWhatsappClick={() => trackWhatsappClick(business.id, selectedDish.id)}
         />
       )}
 

@@ -68,12 +68,21 @@ function IconSignOut() {
   )
 }
 
+function IconChart() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 20V10M12 20V4M6 20v-6" />
+    </svg>
+  )
+}
+
 // ── Nav items ─────────────────────────────────────────────────────────────────
 
 const navItems = [
   { to: '/admin', label: 'Inicio', Icon: IconHome, end: true },
   { to: '/admin/menu', label: 'Platos', Icon: IconDishes, end: false },
   { to: '/admin/categories', label: 'Categorías', Icon: IconCategories, end: false },
+  { to: '/admin/analytics', label: 'Analytics', Icon: IconChart, end: false },
   { to: '/admin/qr', label: 'QR & Link', Icon: IconQR, end: false },
   { to: '/admin/settings', label: 'Ajustes', Icon: IconSettings, end: false },
 ]
