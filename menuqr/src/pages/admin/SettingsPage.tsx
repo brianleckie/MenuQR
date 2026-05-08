@@ -7,7 +7,7 @@ import { ImageUpload } from '../../components/admin/ImageUpload'
 const inputClass =
   'w-full rounded-xl border border-stone-200 bg-stone-50 px-4 py-2.5 text-sm text-stone-800 outline-none transition focus:border-[var(--brand-color)] focus:ring-2 focus:ring-[var(--brand-color)]/20'
 const labelClass =
-  'mb-1.5 block text-xs font-semibold uppercase tracking-wide text-stone-500'
+  'mb-1.5 block text-xs font-semibold uppercase tracking-wide text-[#8C7B6A]'
 
 interface SettingsForm {
   name: string
@@ -156,7 +156,7 @@ export function SettingsPage() {
 
   return (
     <div className="p-4 md:p-8">
-      <h1 className="mb-2 font-serif text-2xl font-bold text-stone-800">Ajustes</h1>
+      <h1 className="mb-2 font-serif text-2xl font-bold text-[#1C1410]">Ajustes</h1>
       {!business && (
         <p className="mb-6 text-sm text-stone-500">
           Completá los datos de tu negocio para activar tu menú digital.
@@ -165,7 +165,7 @@ export function SettingsPage() {
 
       <div className="grid gap-5 lg:grid-cols-2">
         {/* Business info */}
-        <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-stone-100">
+        <div className="rounded-2xl bg-white p-6 ring-1 ring-[#EEE9E2] shadow-[0_1px_3px_rgba(28,20,16,0.06)]">
           <h2 className="mb-5 text-sm font-bold text-stone-700">Información del negocio</h2>
 
           <div className="space-y-4">
@@ -247,7 +247,7 @@ export function SettingsPage() {
         </div>
 
         {/* Brand */}
-        <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-stone-100">
+        <div className="rounded-2xl bg-white p-6 ring-1 ring-[#EEE9E2] shadow-[0_1px_3px_rgba(28,20,16,0.06)]">
           <h2 className="mb-5 text-sm font-bold text-stone-700">Marca</h2>
 
           <div className="mb-5">
@@ -344,7 +344,7 @@ export function SettingsPage() {
         <button
           onClick={handleSave}
           disabled={isPending}
-          className="rounded-xl px-6 py-2.5 text-sm font-bold text-white transition hover:opacity-90 disabled:opacity-60"
+          className="rounded-[10px] px-6 py-2.5 text-[13px] font-bold text-white shadow-[0_2px_8px_rgba(212,98,42,0.25)] transition hover:opacity-90 disabled:opacity-60"
           style={{ background: saved ? '#4A8A4A' : 'var(--brand-color)' }}
         >
           {isPending ? 'Guardando...' : saved ? '✓ Guardado' : business ? 'Guardar cambios' : 'Crear negocio'}

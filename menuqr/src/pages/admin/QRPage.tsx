@@ -52,12 +52,12 @@ export function QRPage() {
 
   return (
     <div className="p-4 md:p-8">
-      <h1 className="mb-6 font-serif text-2xl font-bold text-stone-800">Tu QR y enlace</h1>
+      <h1 className="mb-6 font-serif text-2xl font-bold text-[#1C1410]">Tu QR y enlace</h1>
 
-      <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-stone-100 md:p-8">
+      <div className="rounded-2xl bg-white p-4 ring-1 ring-[#EEE9E2] shadow-[0_1px_3px_rgba(28,20,16,0.06)] md:p-8">
         <div className="flex flex-wrap items-start gap-8 md:gap-10">
           {/* QR display */}
-          <div className="rounded-2xl border-2 border-stone-100 p-4">
+          <div className="rounded-xl border border-[#EEE9E2] p-3">
             <QRCodeSVG
               value={qrUrl}
               size={180}
@@ -88,7 +88,7 @@ export function QRPage() {
 
             <button
               onClick={handleDownload}
-              className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white transition hover:opacity-90"
+              className="flex items-center gap-2 rounded-[10px] px-5 py-2.5 text-[13px] font-bold text-white shadow-[0_2px_8px_rgba(212,98,42,0.25)] transition hover:opacity-90"
               style={{ background: 'var(--brand-color)' }}
             >
               ↓ Descargar PNG

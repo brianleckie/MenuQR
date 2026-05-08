@@ -8,16 +8,18 @@ function StatCard({
   label,
   value,
   sub,
+  className,
 }: {
   label: string
   value: string | number
   sub?: string
+  className?: string
 }) {
   return (
-    <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-stone-100">
-      <p className="mb-1 text-xs font-medium text-stone-400">{label}</p>
-      <p className="font-serif text-2xl font-bold text-stone-800">{value}</p>
-      {sub && <p className="mt-0.5 text-[11px] text-stone-400">{sub}</p>}
+    <div className={`rounded-2xl bg-white p-6 ring-1 ring-[#EEE9E2] shadow-[0_1px_3px_rgba(28,20,16,0.06)] ${className ?? ''}`}>
+      <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#8C7B6A]">{label}</p>
+      <p className="font-serif text-[28px] font-bold text-[#1C1410] leading-none">{value}</p>
+      {sub && <p className="mt-1 text-[12px] text-[#B09A88]">{sub}</p>}
     </div>
   )
 }
@@ -123,10 +125,10 @@ export function DashboardPage() {
   return (
     <div className="p-4 md:p-8">
       <div className="mb-6">
-        <h1 className="mb-1 font-serif text-2xl font-bold text-stone-800">
+        <h1 className="mb-1 font-serif text-2xl font-bold text-[#1C1410]">
           Bienvenido, {business.name} 👋
         </h1>
-        <p className="text-sm text-stone-500">
+        <p className="text-sm text-[#8C7B6A]">
           Tu menú digital está activo y visible para tus clientes.
         </p>
       </div>
@@ -135,7 +137,7 @@ export function DashboardPage() {
       <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-3">
         <StatCard label="Platos" value={total} sub={`${available} disponibles`} />
         <StatCard label="Categorías" value={cats} sub="activas" />
-        <StatCard label="Estado" value="✓ Online" sub="QR activo" />
+        <StatCard label="Estado" value="✓ Online" sub="QR activo" className="max-md:col-span-2 max-md:mx-auto max-md:w-[calc(50%-6px)]" />
       </div>
 
       {/* Analytics shortcut */}
@@ -150,11 +152,11 @@ export function DashboardPage() {
       </div>
 
       {/* QR Panel */}
-      <div className="mb-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-stone-100">
-        <h3 className="mb-4 text-sm font-bold text-stone-800">Tu código QR</h3>
+      <div className="mb-6 rounded-2xl bg-white p-6 ring-1 ring-[#EEE9E2] shadow-[0_1px_3px_rgba(28,20,16,0.06)]">
+        <h3 className="mb-4 text-[13px] font-semibold uppercase tracking-[0.06em] text-[#8C7B6A]">Tu código QR</h3>
         <div className="flex flex-col items-start gap-5 md:flex-row md:items-center md:gap-6">
-          <div className="rounded-xl border-2 border-stone-100 p-3">
-            <FakeQR size={130} />
+          <div className="rounded-xl border border-[#EEE9E2] p-3">
+            <FakeQR size={110} />
           </div>
           <div className="min-w-0 flex-1">
             <p className="mb-2 text-sm leading-relaxed text-stone-600">
@@ -167,7 +169,7 @@ export function DashboardPage() {
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => navigate('/admin/qr')}
-                className="flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-bold text-white"
+                className="flex items-center gap-1.5 rounded-[10px] px-4 py-2 text-[13px] font-bold text-white shadow-[0_2px_8px_rgba(212,98,42,0.25)]"
                 style={{ background: 'var(--brand-color)' }}
               >
                 ↓ Descargar QR
