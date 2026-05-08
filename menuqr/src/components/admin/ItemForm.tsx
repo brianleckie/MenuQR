@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Category, Item } from '../../types'
 import { useUpsertItem } from '../../lib/queries'
 import { ImageUpload } from './ImageUpload'
-import { dishCardWithGravity } from '../../lib/cloudinary'
+import { dishCardWithGravity, optimizeImage } from '../../lib/cloudinary'
 
 interface ItemFormProps {
   item: Item | null
@@ -21,23 +21,106 @@ type ImageGravity =
   | 'west'       | 'center' | 'east'
   | 'south_west' | 'south' | 'south_east'
 
-const GRAVITY_GRID: { value: ImageGravity; label: string }[][] = [
-  [
-    { value: 'north_west', label: '↖' },
-    { value: 'north',      label: '↑' },
-    { value: 'north_east', label: '↗' },
-  ],
-  [
-    { value: 'west',   label: '←' },
-    { value: 'center', label: '·' },
-    { value: 'east',   label: '→' },
-  ],
-  [
-    { value: 'south_west', label: '↙' },
-    { value: 'south',      label: '↓' },
-    { value: 'south_east', label: '↘' },
-  ],
+const GRAVITY_ROWS: ImageGravity[][] = [
+  ['north_west', 'north', 'north_east'],
+  ['west',       'center', 'east'],
+  ['south_west', 'south', 'south_east'],
 ]
+
+const GRAVITY_POS: Record<ImageGravity, { x: number; y: number }> = {
+  north_west: { x: 1 / 6, y: 1 / 6 },
+  north:      { x: 3 / 6, y: 1 / 6 },
+  north_east: { x: 5 / 6, y: 1 / 6 },
+  west:       { x: 1 / 6, y: 3 / 6 },
+  center:     { x: 3 / 6, y: 3 / 6 },
+  east:       { x: 5 / 6, y: 3 / 6 },
+  south_west: { x: 1 / 6, y: 5 / 6 },
+  south:      { x: 3 / 6, y: 5 / 6 },
+  south_east: { x: 5 / 6, y: 5 / 6 },
+}
+
+const GRAVITY_LABEL: Record<ImageGravity, string> = {
+  north_west: 'Arriba izquierda', north: 'Arriba centro', north_east: 'Arriba derecha',
+  west:       'Centro izquierda', center: 'Centro',        east:       'Centro derecha',
+  south_west: 'Abajo izquierda',  south: 'Abajo centro',  south_east: 'Abajo derecha',
+}
+
+function xyToGravity(rx: number, ry: number): ImageGravity {
+  const col = rx < 1 / 3 ? 0 : rx < 2 / 3 ? 1 : 2
+  const row = ry < 1 / 3 ? 0 : ry < 2 / 3 ? 1 : 2
+  return GRAVITY_ROWS[row][col]
+}
+
+// ── FocalPicker ───────────────────────────────────────────────────────────────
+
+interface FocalPickerProps {
+  imageUrl: string
+  gravity: ImageGravity
+  onChange: (g: ImageGravity) => void
+}
+
+function FocalPicker({ imageUrl, gravity, onChange }: FocalPickerProps) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const dragging = useRef(false)
+
+  function applyPointer(e: React.PointerEvent<HTMLDivElement>) {
+    const rect = containerRef.current?.getBoundingClientRect()
+    if (!rect) return
+    const rx = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width))
+    const ry = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height))
+    onChange(xyToGravity(rx, ry))
+  }
+
+  const pos = GRAVITY_POS[gravity]
+  const pickerSrc = optimizeImage(imageUrl, { width: 900, crop: 'fit' })
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative w-full cursor-crosshair select-none overflow-hidden rounded-xl bg-stone-200"
+      style={{ paddingBottom: '66.67%' }}
+      onPointerDown={e => {
+        dragging.current = true
+        e.currentTarget.setPointerCapture(e.pointerId)
+        applyPointer(e)
+      }}
+      onPointerMove={e => { if (dragging.current) applyPointer(e) }}
+      onPointerUp={() => { dragging.current = false }}
+      onPointerCancel={() => { dragging.current = false }}
+    >
+      {/* Full image (no crop) */}
+      <img
+        src={pickerSrc ?? imageUrl}
+        alt=""
+        draggable={false}
+        className="absolute inset-0 h-full w-full object-cover"
+        style={{ pointerEvents: 'none' }}
+      />
+
+      {/* Subtle dim + grid lines */}
+      <div className="absolute inset-0 bg-black/25" style={{ pointerEvents: 'none' }} />
+      <div className="absolute inset-0" style={{ pointerEvents: 'none' }}>
+        <div className="absolute bottom-0 top-0 w-px bg-white/20" style={{ left: '33.33%' }} />
+        <div className="absolute bottom-0 top-0 w-px bg-white/20" style={{ left: '66.67%' }} />
+        <div className="absolute left-0 right-0 h-px bg-white/20" style={{ top: '33.33%' }} />
+        <div className="absolute left-0 right-0 h-px bg-white/20" style={{ top: '66.67%' }} />
+      </div>
+
+      {/* Focal point indicator */}
+      <div
+        className="absolute -translate-x-1/2 -translate-y-1/2 transition-all duration-150 ease-out"
+        style={{ left: `${pos.x * 100}%`, top: `${pos.y * 100}%`, pointerEvents: 'none' }}
+      >
+        <div
+          className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white"
+          style={{ boxShadow: '0 0 0 1.5px rgba(0,0,0,0.35), 0 2px 10px rgba(0,0,0,0.5)' }}
+        >
+          <div className="h-1.5 w-1.5 rounded-full bg-white" />
+        </div>
+      </div>
+    </div>
+  )
+}
 
 interface FormState {
   name: string
@@ -164,54 +247,35 @@ export function ItemForm({ item, businessId, categories, onClose }: ItemFormProp
               />
             </div>
 
-            {/* Gravity selector — solo visible cuando hay imagen */}
+            {/* Focal picker — solo visible cuando hay imagen */}
             {form.image_url && (
               <div>
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-stone-500">
-                  Ajustá el recorte
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#8C7B6A]">
+                  Punto de enfoque
                 </p>
-                <div className="flex items-start gap-4">
-                  {/* 3×3 grid */}
-                  <div className="flex flex-col gap-1">
-                    {GRAVITY_GRID.map((row, ri) => (
-                      <div key={ri} className="flex gap-1">
-                        {row.map(btn => {
-                          const active = form.image_gravity === btn.value
-                          return (
-                            <button
-                              key={btn.value}
-                              type="button"
-                              onClick={() => set('image_gravity', btn.value)}
-                              title={
-                                btn.value === 'center'
-                                  ? 'Automático — Cloudinary detecta el punto de interés'
-                                  : btn.label
-                              }
-                              className="flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold transition"
-                              style={{
-                                background: active ? 'var(--brand-color)' : '#F5F0EA',
-                                color: active ? '#fff' : '#78716C',
-                              }}
-                            >
-                              {btn.label}
-                            </button>
-                          )
-                        })}
-                      </div>
-                    ))}
-                  </div>
+                <FocalPicker
+                  imageUrl={form.image_url}
+                  gravity={form.image_gravity}
+                  onChange={g => set('image_gravity', g)}
+                />
+                <div className="mt-2 flex items-center justify-between">
+                  <p className="text-xs text-stone-400">Tocá o arrastrá para enfocar el recorte</p>
+                  <p className="text-xs font-semibold text-stone-500">{GRAVITY_LABEL[form.image_gravity]}</p>
+                </div>
 
-                  {/* Live preview 3:2 */}
-                  <div className="relative flex-1 overflow-hidden rounded-xl bg-stone-100" style={{ paddingBottom: '66.67%' }}>
-                    {previewSrc && (
+                {/* Live preview */}
+                {previewSrc && (
+                  <div className="mt-3">
+                    <p className="mb-1.5 text-xs text-stone-400">Vista en la tarjeta</p>
+                    <div className="relative overflow-hidden rounded-xl bg-stone-100" style={{ paddingBottom: '66.67%' }}>
                       <img
                         src={previewSrc}
-                        alt="Preview del recorte"
+                        alt="Vista previa del recorte"
                         className="absolute inset-0 h-full w-full object-cover"
                       />
-                    )}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             )}
 
