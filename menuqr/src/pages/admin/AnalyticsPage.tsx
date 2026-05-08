@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useMyBusiness, useAnalytics } from '../../lib/queries'
 
@@ -91,6 +92,13 @@ function TopItems({ items }: { items: { item_id: string; name: string; image_url
 // ── AnalyticsPage ─────────────────────────────────────────────────────────────
 
 export function AnalyticsPage() {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener('resize', handler)
+    return () => window.removeEventListener('resize', handler)
+  }, [])
+
   const { user } = useAuth()
   const { data: business } = useMyBusiness(user?.id)
   const { data, isLoading } = useAnalytics(business?.id)
@@ -122,14 +130,14 @@ export function AnalyticsPage() {
       ) : (
         <>
           {/* Row 1 — Stat cards */}
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 20 }}>
-            <StatCard label="Visitas hoy" value={data.visitsToday} />
-            <StatCard label="Esta semana" value={data.visitsThisWeek} sub="últimos 7 días" />
-            <StatCard label="Este mes" value={data.visitsThisMonth} sub="últimos 30 días" />
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: 12, marginBottom: 20 }}>
+            <StatCard label={isMobile ? 'HOY' : 'VISITAS HOY'} value={data.visitsToday} />
+            <StatCard label={isMobile ? 'SEMANA' : 'ESTA SEMANA'} value={data.visitsThisWeek} sub={isMobile ? '7 días' : 'últimos 7 días'} />
+            <StatCard label={isMobile ? 'MES' : 'ESTE MES'} value={data.visitsThisMonth} sub={isMobile ? '30 días' : 'últimos 30 días'} />
             <StatCard
-              label="WhatsApp esta semana"
+              label={isMobile ? 'WHATSAPP' : 'WHATSAPP ESTA SEMANA'}
               value={data.whatsappThisWeek}
-              sub={`${data.conversionRate}% de conversión`}
+              sub={isMobile ? undefined : `${data.conversionRate}% de conversión`}
             />
           </div>
 
@@ -140,7 +148,7 @@ export function AnalyticsPage() {
           </div>
 
           {/* Row 3 — Two columns */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}>
 
             {/* Top items */}
             <div style={{ background: '#fff', borderRadius: 16, padding: 24, border: '1px solid #EEE9E2', boxShadow: '0 1px 3px rgba(28,20,16,0.06)' }}>
