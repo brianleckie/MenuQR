@@ -31,6 +31,17 @@ function LogoMark({ height = 32 }: { height?: number }) {
   )
 }
 
+const fieldBase: React.CSSProperties = {
+  width: '100%', padding: '14px 16px',
+  background: '#FFFCF4',
+  border: '1.5px solid #161310',
+  fontFamily: 'inherit', fontSize: 15, fontWeight: 500, color: '#161310',
+  borderRadius: 0, outline: 'none',
+  transition: 'box-shadow .12s',
+  boxShadow: '3px 3px 0 #161310',
+  boxSizing: 'border-box' as const,
+}
+
 export function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -74,26 +85,13 @@ export function LoginPage() {
 
   const handleDemoLogin = () => doLogin('demo@menuqr.com', 'demo1234')
 
-  const fieldInput: React.CSSProperties = {
-    width: '100%', padding: '14px 16px',
-    background: '#FFFCF4',
-    border: '1.5px solid #161310',
-    fontFamily: 'inherit', fontSize: 15, fontWeight: 500, color: '#161310',
-    borderRadius: 0, outline: 'none',
-    transition: 'box-shadow .12s',
-    boxShadow: '3px 3px 0 #161310',
-    boxSizing: 'border-box' as const,
-  }
-
   return (
-    <div className="mercado" style={{ minHeight: '100vh', display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', fontFamily: '"Hanken Grotesk","Helvetica Neue",sans-serif' }}>
+    <div className="mercado lp-login-layout">
 
-      {/* ── LEFT brand panel ── */}
-      <aside style={{
+      {/* ── LEFT brand panel — hidden on mobile, visible at 768px ── */}
+      <aside className="lp-login-brand" style={{
         background: 'var(--forest)', color: 'var(--butter)',
-        padding: '40px 56px',
         position: 'relative', overflow: 'hidden',
-        display: 'flex', flexDirection: 'column',
         borderRight: '1.5px solid #161310',
       }}>
         {/* decorative gradients */}
@@ -115,12 +113,12 @@ export function LoginPage() {
             Panel del local
           </div>
 
-          <h2 style={{ fontFamily: '"Bricolage Grotesque",sans-serif', fontSize: 'clamp(40px,4.6vw,68px)', fontWeight: 700, lineHeight: 0.95, letterSpacing: '-0.04em', marginBottom: 20, color: 'var(--butter)', margin: '0 0 20px' }}>
+          <h2 style={{ fontFamily: '"Bricolage Grotesque",sans-serif', fontSize: 'clamp(40px,4.6vw,68px)', fontWeight: 700, lineHeight: 0.95, letterSpacing: '-0.04em', color: 'var(--butter)', margin: '0 0 20px' }}>
             Tu cocina,<br />
             <em style={{ fontStyle: 'italic', color: 'var(--dijon)' }}>tu menú,</em><br />
             <span style={{ position: 'relative', display: 'inline-block' }}>
               tu ritmo.
-              <span style={{ content: '""', position: 'absolute', left: '-2%', right: '-2%', bottom: '6%', height: '14%', background: 'var(--paprika)', zIndex: -1, borderRadius: 4, transform: 'rotate(-1deg)', display: 'block' }} />
+              <span style={{ position: 'absolute', left: '-2%', right: '-2%', bottom: '6%', height: '14%', background: 'var(--paprika)', zIndex: -1, borderRadius: 4, transform: 'rotate(-1deg)', display: 'block' }} />
             </span>
           </h2>
 
@@ -154,32 +152,42 @@ export function LoginPage() {
       </aside>
 
       {/* ── RIGHT form panel ── */}
-      <section style={{ background: 'var(--butter)', padding: '56px', display: 'flex', flexDirection: 'column', position: 'relative' }}>
-        {/* 14 días gratis stamp */}
-        <div style={{ position: 'absolute', top: 32, left: 32, display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 14px', background: 'var(--dijon)', color: '#161310', fontFamily: '"JetBrains Mono",monospace', fontSize: 10.5, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', border: '1.5px solid #161310', transform: 'rotate(-3deg)', boxShadow: '3px 3px 0 #161310', zIndex: 5 }}>
+      <section className="lp-login-form-panel" style={{ background: 'var(--butter)' }}>
+
+        {/* stamp: static on mobile, absolute at 768px */}
+        <div className="lp-login-stamp" style={{
+          padding: '6px 14px',
+          background: 'var(--dijon)', color: '#161310',
+          fontFamily: '"JetBrains Mono",monospace', fontSize: 10.5, fontWeight: 600,
+          letterSpacing: '0.14em', textTransform: 'uppercase',
+          border: '1.5px solid #161310',
+          boxShadow: '3px 3px 0 #161310',
+        }}>
           ✦ 14 días gratis
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', fontSize: 13.5, color: '#5A4E40', fontWeight: 500 }}>
-          <span>¿Todavía no tenés cuenta?</span>
-          <Link to="/" style={{ color: 'var(--paprika)', textDecoration: 'none', fontWeight: 700, marginLeft: 6 }}>Empezá gratis →</Link>
+        {/* top link */}
+        <div className="lp-login-top-link" style={{ fontSize: 13.5, color: '#5A4E40', fontWeight: 500 }}>
+          <span>¿Todavía no tenés cuenta?&nbsp;</span>
+          <Link to="/" style={{ color: 'var(--paprika)', textDecoration: 'none', fontWeight: 700 }}>Empezá gratis →</Link>
         </div>
 
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', maxWidth: 420, margin: '0 auto', width: '100%' }}>
+        {/* form content */}
+        <div className="lp-login-form-wrap">
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, fontSize: 11, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--paprika)', marginBottom: 16 }}>
             <span style={{ width: 24, height: 1.5, background: 'var(--paprika)', display: 'inline-block' }} />
             Acceso · Restaurante
           </div>
 
-          <h1 style={{ fontFamily: '"Bricolage Grotesque",sans-serif', fontSize: 44, fontWeight: 700, lineHeight: 1, letterSpacing: '-0.035em', marginBottom: 12, color: '#161310', margin: '0 0 12px' }}>
+          <h1 style={{ fontFamily: '"Bricolage Grotesque",sans-serif', fontSize: 'clamp(32px,6vw,44px)', fontWeight: 700, lineHeight: 1, letterSpacing: '-0.035em', color: '#161310', margin: '0 0 12px' }}>
             Bienvenido<br />de vuelta.
           </h1>
-          <p style={{ fontSize: 15.5, color: '#5A4E40', lineHeight: 1.5, marginBottom: 32, fontWeight: 500, margin: '0 0 32px' }}>
+          <p style={{ fontSize: 15.5, color: '#5A4E40', lineHeight: 1.5, fontWeight: 500, margin: '0 0 32px' }}>
             Ingresá a tu panel para administrar tu menú, ver pedidos y bajar tu QR.
           </p>
 
           {error && (
-            <div style={{ marginBottom: 16, padding: '12px 16px', background: '#FEF0EC', border: '1px solid #F5C6B0', borderRadius: 0, fontSize: 13.5, color: '#B43417', fontWeight: 500 }}>
+            <div style={{ marginBottom: 16, padding: '12px 16px', background: '#FEF0EC', border: '1px solid #F5C6B0', fontSize: 13.5, color: '#B43417', fontWeight: 500 }}>
               {error}
             </div>
           )}
@@ -195,7 +203,7 @@ export function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="hola@turestaurante.com"
                 autoComplete="email"
-                style={fieldInput}
+                style={fieldBase}
                 onFocus={(e) => { e.currentTarget.style.boxShadow = '4px 4px 0 var(--paprika)' }}
                 onBlur={(e) => { e.currentTarget.style.boxShadow = '3px 3px 0 #161310' }}
               />
@@ -215,7 +223,7 @@ export function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   autoComplete="current-password"
-                  style={{ ...fieldInput, paddingRight: 48 }}
+                  style={{ ...fieldBase, paddingRight: 48 }}
                   onFocus={(e) => { e.currentTarget.style.boxShadow = '4px 4px 0 var(--paprika)' }}
                   onBlur={(e) => { e.currentTarget.style.boxShadow = '3px 3px 0 #161310' }}
                 />
@@ -283,20 +291,6 @@ export function LoginPage() {
           </div>
         </div>
       </section>
-
-      {/* Responsive collapse to 1 col on mobile */}
-      <style>{`
-        @media (max-width: 980px) {
-          .mercado > aside,
-          .mercado > section { padding: 32px 28px !important; }
-          .mercado > aside { min-height: auto; }
-        }
-        @media (max-width: 980px) {
-          div[style*="grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)"] {
-            grid-template-columns: 1fr !important;
-          }
-        }
-      `}</style>
     </div>
   )
 }

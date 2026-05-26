@@ -68,9 +68,150 @@ body {
 @keyframes lp-spin    { from { transform: rotate(15deg) }    to { transform: rotate(375deg) } }
 
 .lp-ticker-track  { display:inline-flex; gap:48px; animation:lp-tick 32s linear infinite; padding-left:48px; white-space:nowrap; }
-.lp-marquee-track { display:inline-flex; gap:56px; animation:lp-tick 40s linear infinite; white-space:nowrap; }
+.lp-marquee-track { display:inline-flex; animation:lp-tick 40s linear infinite; white-space:nowrap; gap:36px; font-family:"Bricolage Grotesque",sans-serif; font-weight:700; letter-spacing:-0.02em; }
 .lp-pulse         { animation: lp-pulse 2s infinite; display:inline-block; }
 .lp-spin          { animation: lp-spin 18s linear infinite; }
+
+/* ─── LandingPage layout — mobile-first ────────────────────────────── */
+.lp-nav {
+  position: sticky; top: 0; z-index: 50;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 18px;
+}
+.lp-nav-links { display: none; }
+
+.lp-hero { padding: 48px 18px 40px; position: relative; overflow: hidden; }
+.lp-hero-inner { max-width: 1280px; margin: 0 auto; }
+.lp-hero-collage { display: none; }
+
+.lp-marquee-wrap { padding: 20px 0; overflow: hidden; }
+.lp-marquee-track { font-size: 28px; }
+
+.lp-section { padding: 64px 18px; }
+.lp-section-head { margin-bottom: 48px; }
+.lp-section-title { font-size: clamp(30px,8vw,72px); }
+
+.lp-steps-grid {
+  max-width: 1100px; margin: 0 auto;
+  border: 1.5px solid #161310; background: #FFFCF4;
+}
+.lp-step {
+  padding: 28px 24px; display: flex; flex-direction: column;
+  border-right: none; border-bottom: 1.5px solid #161310;
+}
+.lp-step:last-child { border-bottom: none; }
+.lp-step-num { font-size: 56px; margin-bottom: 20px; }
+
+.lp-features-card { padding: 24px 20px; position: relative; }
+
+.lp-shoutout { padding: 72px 18px; text-align: center; }
+.lp-shoutout-title { font-size: clamp(32px,8vw,84px); }
+
+.lp-footer { padding: 48px 18px 28px; }
+.lp-footer-grid {
+  max-width: 1200px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr;
+  gap: 28px; padding-bottom: 32px;
+  border-bottom: 1px solid rgba(251,244,226,0.1);
+}
+.lp-footer-bottom {
+  max-width: 1200px; margin: 20px auto 0;
+  display: flex; flex-direction: column; align-items: flex-start;
+  gap: 6px; font-size: 12px; color: rgba(251,244,226,0.4);
+}
+
+/* ticket: full bleed on mobile */
+.lp-ticket-outer { max-width: 480px; margin: 0 auto; width: 100%; padding: 0 4px; }
+.lp-ticket-price-num { font-size: 64px !important; }
+.lp-ticket-top { padding: 24px 24px 20px !important; }
+.lp-ticket-mid { padding: 20px 24px !important; }
+.lp-ticket-bot { padding: 20px 24px 28px !important; }
+
+/* pricing aside */
+.lp-pricing-aside {
+  margin-top: 40px; display: flex; flex-direction: column;
+  align-items: flex-start; gap: 14px; padding: 0 4px;
+}
+
+/* hero meta */
+.lp-hero-meta { display: flex; flex-direction: column; gap: 10px; }
+
+/* ── Tablet: 640px ── */
+@media (min-width: 640px) {
+  .lp-nav { padding: 14px 24px; }
+  .lp-hero { padding: 56px 24px 40px; }
+  .lp-marquee-track { font-size: 34px; gap: 48px; }
+  .lp-section { padding: 80px 24px; }
+  .lp-features-card { padding: 36px 40px; }
+  .lp-shoutout { padding: 90px 24px; }
+  .lp-footer { padding: 52px 24px 28px; }
+  .lp-footer-grid { grid-template-columns: 1fr 1fr; gap: 36px; }
+  .lp-footer-bottom { flex-direction: row; justify-content: space-between; align-items: center; }
+  .lp-ticket-price-num { font-size: 80px !important; }
+  .lp-ticket-top { padding: 28px 32px 24px !important; }
+  .lp-ticket-mid { padding: 24px 32px !important; }
+  .lp-ticket-bot { padding: 24px 32px 28px !important; }
+  .lp-pricing-aside { flex-direction: row; justify-content: center; flex-wrap: wrap; gap: 24px; padding: 0; }
+  .lp-hero-meta { flex-direction: row; gap: 22px; flex-wrap: wrap; }
+}
+
+/* ── Desktop: 1024px ── */
+@media (min-width: 1024px) {
+  .lp-nav { padding: 14px 32px; }
+  .lp-nav-links { display: flex; gap: 28px; align-items: center; }
+  .lp-hero { padding: 64px 32px 40px; }
+  .lp-hero-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+  .lp-hero-collage { display: block; position: relative; height: 620px; }
+  .lp-marquee-track { font-size: 42px; gap: 56px; }
+  .lp-section { padding: 96px 32px; }
+  .lp-section-head { margin-bottom: 64px; }
+  .lp-section-title { font-size: clamp(36px,5.5vw,72px); }
+  .lp-steps-grid { display: grid; grid-template-columns: repeat(3,1fr); }
+  .lp-step { padding: 36px 32px; border-bottom: none; border-right: 1.5px solid #161310; }
+  .lp-step:last-child { border-right: none; }
+  .lp-step-num { font-size: 72px; margin-bottom: 32px; }
+  .lp-features-card { padding: 48px 56px; }
+  .lp-shoutout { padding: 120px 32px; }
+  .lp-shoutout-title { font-size: clamp(40px,6vw,84px); }
+  .lp-footer { padding: 56px 32px 32px; }
+  .lp-footer-grid { grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; }
+  .lp-ticket-price-num { font-size: 96px !important; }
+  .lp-ticket-top { padding: 28px 36px 24px !important; }
+  .lp-ticket-mid { padding: 24px 36px !important; }
+  .lp-ticket-bot { padding: 24px 36px 32px !important; }
+}
+
+/* ─── LoginPage layout — mobile-first ──────────────────────────────── */
+.lp-login-layout {
+  min-height: 100vh; display: grid; grid-template-columns: 1fr;
+  font-family: "Hanken Grotesk","Helvetica Neue",sans-serif;
+}
+.lp-login-brand { display: none; }
+.lp-login-form-panel {
+  padding: 48px 24px; display: flex;
+  flex-direction: column; position: relative;
+}
+.lp-login-form-wrap {
+  flex: 1; display: flex; flex-direction: column;
+  justify-content: center;
+  max-width: 420px; margin: 0 auto; width: 100%;
+  padding-top: 40px;
+}
+.lp-login-stamp {
+  position: static; margin-bottom: 24px;
+  display: inline-flex; align-items: center; gap: 8px;
+  transform: rotate(-2deg);
+}
+.lp-login-top-link { display: flex; justify-content: flex-end; margin-bottom: 0; }
+
+@media (min-width: 768px) {
+  .lp-login-layout { grid-template-columns: 1fr 1fr; }
+  .lp-login-brand { display: flex; flex-direction: column; padding: 40px 48px; }
+  .lp-login-form-panel { padding: 56px; }
+  .lp-login-form-wrap { padding-top: 0; }
+  .lp-login-stamp { position: absolute; top: 32px; left: 32px; transform: rotate(-3deg); margin-bottom: 0; }
+  .lp-login-top-link { margin-bottom: 0; }
+}
 
 @keyframes slideUp {
   from { transform: translateY(100%); }
