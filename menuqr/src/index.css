@@ -43,6 +43,35 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* ── Mercado palette (Landing + Login redesign) ─────────────────────── */
+:root {
+  --butter: #FBF4E2;
+  --butter-deep: #F2E8CE;
+  --paprika: #E54A24;
+  --paprika-deep: #B43417;
+  --forest: #1A3329;
+  --forest-soft: #2A4F3E;
+  --dijon: #E8B23A;
+  --clay: #D89B6E;
+  --paper: #FFFCF4;
+}
+
+/* Scoped overrides for Mercado pages */
+.mercado {
+  --ink: #161310;
+  --ink-soft: #5A4E40;
+  --line: #D8C9A1;
+}
+
+@keyframes lp-tick    { from { transform: translateX(0) }    to { transform: translateX(-50%) } }
+@keyframes lp-pulse   { 0%,100% { opacity:1; transform:scale(1) } 50% { opacity:.4; transform:scale(.7) } }
+@keyframes lp-spin    { from { transform: rotate(15deg) }    to { transform: rotate(375deg) } }
+
+.lp-ticker-track  { display:inline-flex; gap:48px; animation:lp-tick 32s linear infinite; padding-left:48px; white-space:nowrap; }
+.lp-marquee-track { display:inline-flex; gap:56px; animation:lp-tick 40s linear infinite; white-space:nowrap; }
+.lp-pulse         { animation: lp-pulse 2s infinite; display:inline-block; }
+.lp-spin          { animation: lp-spin 18s linear infinite; }
+
 @keyframes slideUp {
   from { transform: translateY(100%); }
   to   { transform: translateY(0); }
